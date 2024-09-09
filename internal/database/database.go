@@ -1,6 +1,7 @@
 package database
 
 import (
+	"ExerciseManager/internal/user/model"
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -45,7 +46,9 @@ func (c *Connector) Connect() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	if err := db.AutoMigrate(); err != nil {
+	if err := db.AutoMigrate(
+		&model.User{},
+	); err != nil {
 		return nil, err
 	}
 
