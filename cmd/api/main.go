@@ -2,13 +2,18 @@ package main
 
 import (
 	"ExerciseManager/internal/config"
+	"ExerciseManager/internal/database"
 	"fmt"
+	"gorm.io/gorm"
 	"log"
 )
 
 func main() {
 	cfg := initConfig()
+	db := initDatabase(cfg)
+
 	fmt.Println(cfg)
+	fmt.Println(db)
 }
 
 func initConfig() *config.Config {
@@ -17,4 +22,13 @@ func initConfig() *config.Config {
 		log.Fatal("Error loading environmental and configuration files.")
 	}
 	return c
+}
+
+func initDatabase(cfg *config.Config) *gorm.DB {
+	DBConnector := database.NewConnector(cfg.DB.Name, cfg.DB.User, cfg.DB.Password, cfg.DB.Host, cfg.DB.Port)
+	db, err := DBConnector.Connect()
+	if err != nil {
+		log.Fatal("Error connecting to database.")
+	}
+	return db
 }
