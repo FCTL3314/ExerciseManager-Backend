@@ -19,7 +19,7 @@ func main() {
 func initConfig() *config.Config {
 	c, err := config.NewConfig()
 	if err != nil {
-		log.Fatal("Error loading environmental and configuration files.")
+		log.Fatal("Error loading config. Please check if environmental files exists.")
 	}
 	return c
 }
