@@ -3,6 +3,7 @@ package main
 import (
 	"ExerciseManager/internal/config"
 	"ExerciseManager/internal/database"
+	"ExerciseManager/internal/domain"
 	"fmt"
 	"gorm.io/gorm"
 	"log"
@@ -12,8 +13,10 @@ func main() {
 	cfg := initConfig()
 	db := initDatabase(cfg)
 
-	fmt.Println(cfg)
-	fmt.Println(db)
+	result := &domain.Exercise{}
+	db.First(&result)
+
+	fmt.Println(result)
 }
 
 func initConfig() *config.Config {
