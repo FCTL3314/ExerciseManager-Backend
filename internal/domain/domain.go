@@ -1,15 +1,15 @@
 package domain
 
 type Getter[T any] interface {
-	Get(conds ...interface{}) (*T, error)
-}
-
-type Creator[T any] interface {
-	Create(entity *T) error
+	Get(query interface{}, args ...interface{}) (*T, error)
 }
 
 type Lister[T any] interface {
-	List(conds ...interface{}) ([]T, error)
+	List(query interface{}, args ...interface{}) ([]*T, error)
+}
+
+type Creator[T any] interface {
+	Create(entity *T) (*T, error)
 }
 
 type Deleter[T any] interface {

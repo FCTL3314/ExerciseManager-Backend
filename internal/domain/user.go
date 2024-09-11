@@ -13,5 +13,5 @@ type User struct {
 
 type UserRepository interface {
 	Repository[User]
-	GetByUsername(username string) (User, error)
+	GetByUsername(username string) (*User, error)
 }

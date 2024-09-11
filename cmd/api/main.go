@@ -3,7 +3,7 @@ package main
 import (
 	"ExerciseManager/internal/config"
 	"ExerciseManager/internal/database"
-	"ExerciseManager/internal/domain"
+	"ExerciseManager/internal/repository"
 	"fmt"
 	"gorm.io/gorm"
 	"log"
@@ -13,10 +13,14 @@ func main() {
 	cfg := initConfig()
 	db := initDatabase(cfg)
 
-	result := &domain.Exercise{}
-	db.First(&result)
+	UserRepository := repository.NewUserRepository(db)
 
-	fmt.Println(result)
+	user, err := UserRepository.GetByUsername("TestUser")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(user)
 }
 
 func initConfig() *config.Config {
@@ -28,7 +32,13 @@ func initConfig() *config.Config {
 }
 
 func initDatabase(cfg *config.Config) *gorm.DB {
-	DBConnector := database.NewConnector(cfg.DB.Name, cfg.DB.User, cfg.DB.Password, cfg.DB.Host, cfg.DB.Port)
+	DBConnector := database.NewConnector(
+		cfg.DB.Name,
+		cfg.DB.User,
+		cfg.DB.Password,
+		cfg.DB.Host,
+		cfg.DB.Port,
+	)
 	db, err := DBConnector.Connect()
 	if err != nil {
 		log.Fatal("Error connecting to database.")
