@@ -3,6 +3,7 @@ package main
 import (
 	"ExerciseManager/internal/config"
 	"ExerciseManager/internal/database"
+	"ExerciseManager/internal/domain"
 	"ExerciseManager/internal/repository"
 	"fmt"
 	"gorm.io/gorm"
@@ -15,12 +16,24 @@ func main() {
 
 	UserRepository := repository.NewUserRepository(db)
 
-	user, err := UserRepository.GetByUsername("TestUser")
+	users, err := UserRepository.List(
+		&domain.Params{
+			FilterParams: domain.FilterParams{
+				Limit:  1,
+				Offset: 1,
+				Query:  "",
+				Args:   []interface{}{},
+			},
+			OrderParams: domain.OrderParams{
+				Order: "",
+			},
+		},
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(user)
+	fmt.Println(users)
 }
 
 func initConfig() *config.Config {

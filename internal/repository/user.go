@@ -26,9 +26,9 @@ func (ur *UserRepository) GetByUsername(username string) (*domain.User, error) {
 	return ur.Get("username = ?", username)
 }
 
-func (ur *UserRepository) List(query interface{}, args ...interface{}) ([]*domain.User, error) {
+func (ur *UserRepository) List(params *domain.Params) ([]*domain.User, error) {
 	var users []*domain.User
-	result := ur.db.Where(query, args...).Find(&users)
+	result := ur.db.Where(params.Query, params.Args...).Find(&users)
 	if result.Error != nil {
 		return nil, result.Error
 	}
