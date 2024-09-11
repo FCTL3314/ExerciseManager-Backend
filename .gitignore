@@ -25,4 +25,4 @@ go.work.sum
 .env
 
 # Database files
-docker/local/postgres-data
+docker/local/volumes/postgres

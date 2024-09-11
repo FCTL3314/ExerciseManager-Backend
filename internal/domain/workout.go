@@ -9,7 +9,8 @@ type Workout struct {
 	Name        string
 	Description string
 	UserID      uint
-	User        User
+	User        *User
+	Exercises   []*Exercise `gorm:"many2many:workout_exercises;"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
