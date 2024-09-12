@@ -5,6 +5,7 @@ import (
 	"ExerciseManager/internal/database"
 	"ExerciseManager/internal/domain"
 	"ExerciseManager/internal/repository"
+	"ExerciseManager/internal/usecase"
 	"encoding/json"
 	"fmt"
 	"gorm.io/gorm"
@@ -15,9 +16,10 @@ func main() {
 	cfg := initConfig()
 	db := initDatabase(cfg)
 
-	UserRepository := repository.NewUserRepository(db)
+	userRepository := repository.NewUserRepository(db)
+	userUsecase := usecase.NewUserUsecase(userRepository)
 
-	users, err := UserRepository.List(
+	users, err := userUsecase.List(
 		&domain.Params{
 			OrderParams: domain.OrderParams{
 				Order: "username",

@@ -33,7 +33,9 @@ func (ur *UserRepository) List(params *domain.Params) ([]*domain.User, error) {
 	var users []*domain.User
 	query := ur.db.Where(params.Filter.Query, params.Filter.Args...)
 	query = query.Order(params.Order)
-	query = query.Limit(params.Pagination.Limit).Offset(params.Pagination.Offset)
+	if params.Pagination.Limit != 0 {
+		query = query.Limit(params.Pagination.Limit).Offset(params.Pagination.Offset)
+	}
 	query = query.Find(&users)
 	if query.Error != nil {
 		return nil, query.Error
