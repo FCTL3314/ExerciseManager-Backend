@@ -5,6 +5,7 @@ import (
 	"ExerciseManager/internal/database"
 	"ExerciseManager/internal/domain"
 	"ExerciseManager/internal/repository"
+	"encoding/json"
 	"fmt"
 	"gorm.io/gorm"
 	"log"
@@ -18,14 +19,8 @@ func main() {
 
 	users, err := UserRepository.List(
 		&domain.Params{
-			FilterParams: domain.FilterParams{
-				Limit:  1,
-				Offset: 1,
-				Query:  "",
-				Args:   []interface{}{},
-			},
 			OrderParams: domain.OrderParams{
-				Order: "",
+				Order: "username",
 			},
 		},
 	)
@@ -33,7 +28,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(users)
+	usersJSON, err := json.MarshalIndent(users, "", "  ")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(usersJSON))
+
 }
 
 func initConfig() *config.Config {

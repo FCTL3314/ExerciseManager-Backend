@@ -1,10 +1,13 @@
 package domain
 
 type FilterParams struct {
+	Query interface{}
+	Args  []interface{}
+}
+
+type PaginationParams struct {
 	Limit  int
 	Offset int
-	Query  interface{}
-	Args   []interface{}
 }
 
 type OrderParams struct {
@@ -12,12 +15,13 @@ type OrderParams struct {
 }
 
 type Params struct {
-	FilterParams
+	Filter     FilterParams
+	Pagination PaginationParams
 	OrderParams
 }
 
 type Getter[T any] interface {
-	Get(query interface{}, args ...interface{}) (*T, error)
+	Get(params *FilterParams) (*T, error)
 }
 
 type Lister[T any] interface {
