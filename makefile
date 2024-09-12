@@ -12,3 +12,13 @@ restart_local_services: up_local_services down_local_services
 
 local_services_logs:
 	docker-compose -p $(DOCKER_COMPOSE_PROJECT_NAME) -f $(LOCAL_DOCKER_COMPOSE_FILE) logs
+
+# Migrations(Goose)
+MIGRATIONS_DIR=internal/database/migrations
+POSTGRES_DSN=postgresql://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable
+
+apply_migrations:
+	goose -dir $(MIGRATIONS_DIR)  postgres "$(POSTGRES_DSN)" up
+
+add_migration:
+	goose -dir $(MIGRATIONS_DIR) create $(name) sql

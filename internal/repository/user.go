@@ -31,7 +31,10 @@ func (ur *UserRepository) GetByUsername(username string) (*domain.User, error) {
 
 func (ur *UserRepository) List(params *domain.Params) ([]*domain.User, error) {
 	var users []*domain.User
-	query := ur.db.Where(params.Filter.Query, params.Filter.Args...).Order(params.Order).Find(&users)
+	query := ur.db.Where(params.Filter.Query, params.Filter.Args...)
+	query = query.Order(params.Order)
+	query = query.Limit(params.Pagination.Limit).Offset(params.Pagination.Offset)
+	query = query.Find(&users)
 	if query.Error != nil {
 		return nil, query.Error
 	}
