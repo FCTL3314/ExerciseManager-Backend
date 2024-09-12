@@ -2,8 +2,18 @@
 
 Backend server that provides an API for workout reminders and tracking exercise completion, including fitness activities like calisthenics and so on. 
 
-Goose base command: `goose -dir db/migrations <command>`
-Goose local migration command: `goose -dir internal/database/migrations postgres "postgresql://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" up`
+# Dependencies
+* **GoLang**
+* **Docker**
+* **Makefile**
+  * In Windows can be installed with: `choco install make`
+
+# Notes
+* All Docker volumes are stored in the `docker/local/volumes/` folder. If you want to clear your DB or any other data, you can simply delete the folder there.
+
+# Work with migrations
+* Goose base command: `goose -dir internal/database/migrations <command>`
+* Goose apply migration command for local development: `goose -dir internal/database/migrations postgres "postgresql://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable" up`
 
 # Development
 1. Download dependencies: `go mod download`
