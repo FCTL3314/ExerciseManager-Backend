@@ -1,8 +1,8 @@
 package main
 
 import (
+	"ExerciseManager/api/controller"
 	"ExerciseManager/internal/config"
-	"ExerciseManager/internal/controller"
 	"ExerciseManager/internal/database"
 	"ExerciseManager/internal/repository"
 	"ExerciseManager/internal/usecase"
