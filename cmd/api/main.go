@@ -2,8 +2,7 @@ package main
 
 import (
 	"ExerciseManager/api/controller"
-	"ExerciseManager/internal/config"
-	"ExerciseManager/internal/database"
+	"ExerciseManager/bootstrap"
 	"ExerciseManager/internal/repository"
 	"ExerciseManager/internal/usecase"
 	"fmt"
@@ -23,16 +22,16 @@ func main() {
 
 }
 
-func initConfig() *config.Config {
-	c, err := config.NewConfig()
+func initConfig() *bootstrap.Config {
+	c, err := bootstrap.NewConfig()
 	if err != nil {
 		log.Fatal("Error loading config. Please check if environmental files exists.")
 	}
 	return c
 }
 
-func initDatabase(cfg *config.Config) *gorm.DB {
-	DBConnector := database.NewConnector(
+func initDatabase(cfg *bootstrap.Config) *gorm.DB {
+	DBConnector := bootstrap.NewConnector(
 		cfg.DB.Name,
 		cfg.DB.User,
 		cfg.DB.Password,
