@@ -1,46 +1,19 @@
 package main
 
 import (
-	"ExerciseManager/api/controller"
+	"ExerciseManager/api/route"
 	"ExerciseManager/bootstrap"
-	"ExerciseManager/internal/repository"
-	"ExerciseManager/internal/usecase"
-	"fmt"
-	"gorm.io/gorm"
-	"log"
 )
 
 func main() {
-	cfg := initConfig()
-	db := initDatabase(cfg)
+	app := bootstrap.NewApplication()
+	g := app.Gin
+	db := app.DB
+	cfg := app.Cfg
 
-	userRepository := repository.NewUserRepository(db)
-	userUsecase := usecase.NewUserUsecase(userRepository)
-	userController := controller.NewUserController(userUsecase)
+	route.Register(g, db)
 
-	fmt.Println(userController)
-
-}
-
-func initConfig() *bootstrap.Config {
-	c, err := bootstrap.NewConfig()
-	if err != nil {
-		log.Fatal("Error loading config. Please check if environmental files exists.")
+	if err := g.Run(cfg.Server.Address); err != nil {
+		panic(err)
 	}
-	return c
-}
-
-func initDatabase(cfg *bootstrap.Config) *gorm.DB {
-	DBConnector := bootstrap.NewConnector(
-		cfg.DB.Name,
-		cfg.DB.User,
-		cfg.DB.Password,
-		cfg.DB.Host,
-		cfg.DB.Port,
-	)
-	db, err := DBConnector.Connect()
-	if err != nil {
-		log.Fatal("Error connecting to database.")
-	}
-	return db
 }

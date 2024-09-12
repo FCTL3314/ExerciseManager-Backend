@@ -4,6 +4,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+type Server struct {
+	Mode           string   `mapstructure:"gin_mode"`
+	TrustedProxies []string `mapstructure:"trusted_proxies"`
+	Address        string   `mapstructure:"server_address"`
+}
+
 type Database struct {
 	Name     string `mapstructure:"db_name"`
 	User     string `mapstructure:"db_user"`
@@ -13,6 +19,7 @@ type Database struct {
 }
 
 type Config struct {
+	Server
 	DB Database
 }
 
@@ -45,6 +52,10 @@ func (cfg *Config) loadFromFile(Path string, ConfigType string) error {
 	}
 
 	if err := viper.Unmarshal(&cfg.DB); err != nil {
+		return err
+	}
+
+	if err := viper.Unmarshal(&cfg.Server); err != nil {
 		return err
 	}
 
