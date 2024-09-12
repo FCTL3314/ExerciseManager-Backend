@@ -2,11 +2,10 @@ package main
 
 import (
 	"ExerciseManager/internal/config"
+	"ExerciseManager/internal/controller"
 	"ExerciseManager/internal/database"
-	"ExerciseManager/internal/domain"
 	"ExerciseManager/internal/repository"
 	"ExerciseManager/internal/usecase"
-	"encoding/json"
 	"fmt"
 	"gorm.io/gorm"
 	"log"
@@ -18,25 +17,9 @@ func main() {
 
 	userRepository := repository.NewUserRepository(db)
 	userUsecase := usecase.NewUserUsecase(userRepository)
+	userController := controller.NewUserController(userUsecase)
 
-	users, err := userUsecase.List(
-		&domain.Params{
-			OrderParams: domain.OrderParams{
-				Order: "username",
-			},
-		},
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	usersJSON, err := json.MarshalIndent(users, "", "  ")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(string(usersJSON))
+	fmt.Println(userController)
 
 }
 

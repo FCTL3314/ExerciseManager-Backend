@@ -42,3 +42,17 @@ type Repository[T any] interface {
 	Lister[T]
 	Deleter[T]
 }
+
+type Usecase[T any] interface {
+	Getter[T]
+	Creator[T]
+	Lister[T]
+	Deleter[T]
+}
+
+type Controller[T any] interface {
+	Getter[T]
+	Creator[T]
+	Lister[T]
+	Deleter[T]
+}

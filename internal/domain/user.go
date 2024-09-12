@@ -15,3 +15,11 @@ type UserRepository interface {
 	Repository[User]
 	GetByUsername(username string) (*User, error)
 }
+
+type UserUsecase interface {
+	Usecase[User]
+}
+
+type UserController interface {
+	Controller[User]
+}
