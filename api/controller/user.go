@@ -102,7 +102,7 @@ func (uc *UserController) Create(c *gin.Context) {
 func (uc *UserController) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.InvalidURLParamErrorResponse)
+		c.JSON(http.StatusBadRequest, domain.InvalidURLParamErrorResponse)
 		return
 	}
 
@@ -136,7 +136,7 @@ func (uc *UserController) Update(c *gin.Context) {
 func (uc *UserController) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.InvalidURLParamErrorResponse)
+		c.JSON(http.StatusBadRequest, domain.InvalidURLParamErrorResponse)
 		return
 	}
 
