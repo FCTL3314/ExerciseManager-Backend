@@ -75,6 +75,12 @@ func (uc *UserController) Create(c *gin.Context) {
 		return
 	}
 
+	validate := validator.New()
+	if err := validate.Struct(user); err != nil {
+		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
+		return
+	}
+
 	createdUser, err := uc.usecase.Create(&user)
 	if err != nil {
 
@@ -107,8 +113,7 @@ func (uc *UserController) Update(c *gin.Context) {
 	}
 
 	validate := validator.New()
-	err = validate.Struct(user)
-	if err != nil {
+	if err = validate.Struct(user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
 		return
 	}
