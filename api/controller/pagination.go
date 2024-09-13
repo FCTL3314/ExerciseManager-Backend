@@ -12,7 +12,7 @@ const (
 	MaxUserPaginationLimit = 32
 )
 
-func handlePaginationError(c *gin.Context, err error) bool {
+func handlePaginationLimitExceededError(c *gin.Context, err error) bool {
 	if err != nil {
 		var limitErr *domain.PaginationLimitExceededError
 		if errors.As(err, &limitErr) {

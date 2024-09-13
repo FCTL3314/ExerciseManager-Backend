@@ -21,7 +21,7 @@ type Deleter[T any] interface {
 }
 
 type Counter[T any] interface {
-	Count() (int64, error)
+	Count(params *FilterParams) (int64, error)
 }
 
 type Repository[T any] interface {

@@ -22,7 +22,7 @@ func (uu *UserUsecase) List(params *domain.Params) (*domain.PaginatedResult[*dom
 		return &domain.PaginatedResult[*domain.User]{}, err
 	}
 
-	count, err := uu.userRepository.Count()
+	count, err := uu.userRepository.Count(&domain.FilterParams{})
 	if err != nil {
 		return &domain.PaginatedResult[*domain.User]{}, err
 	}

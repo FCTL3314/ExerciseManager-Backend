@@ -20,7 +20,7 @@ func (uc *UserController) Get(c *gin.Context) {
 
 func (uc *UserController) List(c *gin.Context) {
 	paginationParams, err := getUserPaginationParams(c)
-	if handlePaginationError(c, err) {
+	if handlePaginationLimitExceededError(c, err) {
 		return
 	}
 
@@ -37,7 +37,7 @@ func (uc *UserController) List(c *gin.Context) {
 	responseUsers := domain.ToResponseUsers(paginatedResult.Data)
 
 	paginatedResponse := domain.PaginatedResponse{
-		Total:  int(paginatedResult.Count),
+		Count:  int(paginatedResult.Count),
 		Limit:  paginationParams.Limit,
 		Offset: paginationParams.Offset,
 		Data:   responseUsers,

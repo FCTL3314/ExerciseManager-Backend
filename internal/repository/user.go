@@ -66,9 +66,9 @@ func (ur *UserRepository) Delete(id uint) error {
 	return nil
 }
 
-func (ur *UserRepository) Count() (int64, error) {
+func (ur *UserRepository) Count(params *domain.FilterParams) (int64, error) {
 	var count int64
-	query := ur.db.Model(&domain.User{}).Count(&count)
+	query := ur.db.Model(&domain.User{}).Where(params.Query, params.Args...).Count(&count)
 	if query.Error != nil {
 		return 0, query.Error
 	}
