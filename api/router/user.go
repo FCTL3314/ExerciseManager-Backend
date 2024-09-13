@@ -39,7 +39,7 @@ func (ur *UserRouter) RegisterList() {
 }
 
 func (ur *UserRouter) RegisterCreate() {
-	ur.router.GET("/stub2", ur.userController.Create)
+	ur.router.POST("", ur.userController.Create)
 }
 
 func (ur *UserRouter) RegisterUpdate() {

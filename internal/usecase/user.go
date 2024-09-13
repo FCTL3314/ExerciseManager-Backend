@@ -2,6 +2,8 @@ package usecase
 
 import (
 	"ExerciseManager/internal/domain"
+	"errors"
+	"gorm.io/gorm"
 )
 
 type UserUsecase struct {
@@ -30,8 +32,16 @@ func (uu *UserUsecase) List(params *domain.Params) (*domain.PaginatedResult[*dom
 	return &domain.PaginatedResult[*domain.User]{Results: users, Count: count}, nil
 }
 
-func (uu *UserUsecase) Create(user *domain.User) (*domain.User, error) {
-	return uu.userRepository.Create(user)
+func (uu *UserUsecase) Create(createUser *domain.CreateUser) (*domain.User, error) {
+	_, err := uu.userRepository.GetByUsername(createUser.Username)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return uu.userRepository.Create(createUser.ToUser())
+		}
+		return &domain.User{}, err
+	}
+
+	return &domain.User{}, &domain.ObjectUniqueConstraintError{Field: "username"}
 }
 
 func (uu *UserUsecase) Update(user *domain.User) (*domain.User, error) {

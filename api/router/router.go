@@ -6,7 +6,7 @@ import (
 )
 
 func RegisterRoutes(gin *gin.Engine, db *gorm.DB) {
-	baseRouter := gin.Group("/api/")
+	baseRouter := gin.Group("/api/v1/")
 
 	registerUserRoutes(baseRouter, db)
 }

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"ExerciseManager/internal/domain"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -47,7 +48,26 @@ func (uc *UserController) List(c *gin.Context) {
 }
 
 func (uc *UserController) Create(c *gin.Context) {
-	uc.usecase.Create(&domain.User{})
+	var user domain.CreateUser
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
+		return
+	}
+
+	createdUser, err := uc.usecase.Create(&user)
+	if err != nil {
+
+		var uniqueConstraintErr *domain.ObjectUniqueConstraintError
+		if errors.As(err, &uniqueConstraintErr) {
+			c.JSON(http.StatusConflict, domain.NewUniqueConstraintErrorResponse(err.Error()))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, domain.InternalServerError)
+		return
+	}
+
+	c.JSON(http.StatusCreated, createdUser)
 }
 
 func (uc *UserController) Update(c *gin.Context) {

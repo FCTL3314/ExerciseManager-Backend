@@ -19,6 +19,20 @@ func NewPaginationErrorResponse(detail string) *ErrorResponse {
 	}
 }
 
+func NewValidationErrorResponse(detail string) *ErrorResponse {
+	return &ErrorResponse{
+		Detail:   detail,
+		Codename: "validation_error",
+	}
+}
+
+func NewUniqueConstraintErrorResponse(detail string) *ErrorResponse {
+	return &ErrorResponse{
+		Detail:   detail,
+		Codename: "unique_constraint_error",
+	}
+}
+
 var (
 	InternalServerError = ErrorResponse{
 		Detail:   "Internal Server Error",
