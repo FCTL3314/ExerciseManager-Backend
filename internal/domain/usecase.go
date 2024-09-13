@@ -1,10 +1,5 @@
 package domain
 
-type PaginatedResult[T any] struct {
-	Data  []*User
-	Count int64
-}
-
 type UserUsecase interface {
 	Get(params *FilterParams) (*User, error)
 	List(params *Params) (*PaginatedResult[*User], error)

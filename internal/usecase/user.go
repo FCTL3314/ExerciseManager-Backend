@@ -27,7 +27,7 @@ func (uu *UserUsecase) List(params *domain.Params) (*domain.PaginatedResult[*dom
 		return &domain.PaginatedResult[*domain.User]{}, err
 	}
 
-	return &domain.PaginatedResult[*domain.User]{Data: users, Count: count}, nil
+	return &domain.PaginatedResult[*domain.User]{Results: users, Count: count}, nil
 }
 
 func (uu *UserUsecase) Create(user *domain.User) (*domain.User, error) {

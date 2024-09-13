@@ -1,10 +1,10 @@
 package domain
 
 type PaginatedResponse struct {
-	Count  int         `json:"count"`
-	Limit  int         `json:"limit"`
-	Offset int         `json:"offset"`
-	Data   interface{} `json:"data"`
+	Count   int         `json:"count"`
+	Limit   int         `json:"limit"`
+	Offset  int         `json:"offset"`
+	Results interface{} `json:"results"`
 }
 
 type ErrorResponse struct {

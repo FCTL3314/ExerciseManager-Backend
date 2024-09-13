@@ -34,13 +34,13 @@ func (uc *UserController) List(c *gin.Context) {
 		return
 	}
 
-	responseUsers := domain.ToResponseUsers(paginatedResult.Data)
+	responseUsers := domain.ToResponseUsers(paginatedResult.Results)
 
 	paginatedResponse := domain.PaginatedResponse{
-		Count:  int(paginatedResult.Count),
-		Limit:  paginationParams.Limit,
-		Offset: paginationParams.Offset,
-		Data:   responseUsers,
+		Count:   int(paginatedResult.Count),
+		Limit:   paginationParams.Limit,
+		Offset:  paginationParams.Offset,
+		Results: responseUsers,
 	}
 
 	c.JSON(http.StatusOK, paginatedResponse)
