@@ -16,8 +16,18 @@ func (uu *UserUsecase) Get(params *domain.FilterParams) (*domain.User, error) {
 	return uu.userRepository.Get(params)
 }
 
-func (uu *UserUsecase) List(params *domain.Params) ([]*domain.User, error) {
-	return uu.userRepository.List(params)
+func (uu *UserUsecase) List(params *domain.Params) (*domain.PaginatedResult[*domain.User], error) {
+	users, err := uu.userRepository.Fetch(params)
+	if err != nil {
+		return &domain.PaginatedResult[*domain.User]{}, err
+	}
+
+	count, err := uu.userRepository.Count()
+	if err != nil {
+		return &domain.PaginatedResult[*domain.User]{}, err
+	}
+
+	return &domain.PaginatedResult[*domain.User]{Data: users, Count: count}, nil
 }
 
 func (uu *UserUsecase) Create(user *domain.User) (*domain.User, error) {

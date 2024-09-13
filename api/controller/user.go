@@ -7,37 +7,53 @@ import (
 )
 
 type UserController struct {
-	userUsecase domain.UserUsecase
+	usecase domain.UserUsecase
 }
 
-func NewUserController(userUsecase domain.UserUsecase) *UserController {
-	return &UserController{userUsecase: userUsecase}
+func NewUserController(usecase domain.UserUsecase) *UserController {
+	return &UserController{usecase: usecase}
 }
 
 func (uc *UserController) Get(c *gin.Context) {
-	uc.userUsecase.Get(&domain.FilterParams{})
+	uc.usecase.Get(&domain.FilterParams{})
 }
 
 func (uc *UserController) List(c *gin.Context) {
-	users, err := uc.userUsecase.List(&domain.Params{})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.ErrorResponse{Message: err.Error()})
+	paginationParams, err := getUserPaginationParams(c)
+	if handlePaginationError(c, err) {
 		return
 	}
 
-	responseUsers := domain.ToResponseUsers(users)
+	params := domain.Params{
+		Pagination: paginationParams,
+	}
 
-	c.JSON(http.StatusOK, responseUsers)
+	paginatedResult, err := uc.usecase.List(&params)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.InternalServerError)
+		return
+	}
+
+	responseUsers := domain.ToResponseUsers(paginatedResult.Data)
+
+	paginatedResponse := domain.PaginatedResponse{
+		Total:  int(paginatedResult.Count),
+		Limit:  paginationParams.Limit,
+		Offset: paginationParams.Offset,
+		Data:   responseUsers,
+	}
+
+	c.JSON(http.StatusOK, paginatedResponse)
 }
 
 func (uc *UserController) Create(c *gin.Context) {
-	uc.userUsecase.Create(&domain.User{})
+	uc.usecase.Create(&domain.User{})
 }
 
 func (uc *UserController) Update(c *gin.Context) {
-	uc.userUsecase.Update(&domain.User{})
+	uc.usecase.Update(&domain.User{})
 }
 
 func (uc *UserController) Delete(c *gin.Context) {
-	uc.userUsecase.Delete(0)
+	uc.usecase.Delete(0)
 }

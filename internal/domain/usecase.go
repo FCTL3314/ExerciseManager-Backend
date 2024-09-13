@@ -1,13 +1,14 @@
 package domain
 
-type Usecase[T any] interface {
-	Getter[T]
-	Lister[T]
-	Creator[T]
-	Updater[T]
-	Deleter[T]
+type PaginatedResult[T any] struct {
+	Data  []*User
+	Count int64
 }
 
 type UserUsecase interface {
-	Usecase[User]
+	Get(params *FilterParams) (*User, error)
+	List(params *Params) (*PaginatedResult[*User], error)
+	Create(user *User) (*User, error)
+	Update(user *User) (*User, error)
+	Delete(id uint) error
 }

@@ -29,7 +29,7 @@ func (ur *UserRepository) GetByUsername(username string) (*domain.User, error) {
 	})
 }
 
-func (ur *UserRepository) List(params *domain.Params) ([]*domain.User, error) {
+func (ur *UserRepository) Fetch(params *domain.Params) ([]*domain.User, error) {
 	var users []*domain.User
 	query := ur.db.Where(params.Filter.Query, params.Filter.Args...)
 	query = query.Order(params.Order)
@@ -64,4 +64,13 @@ func (ur *UserRepository) Delete(id uint) error {
 		return query.Error
 	}
 	return nil
+}
+
+func (ur *UserRepository) Count() (int64, error) {
+	var count int64
+	query := ur.db.Model(&domain.User{}).Count(&count)
+	if query.Error != nil {
+		return 0, query.Error
+	}
+	return count, nil
 }
