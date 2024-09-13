@@ -4,29 +4,47 @@ import (
 	"time"
 )
 
+type ToUserConverter interface {
+	ToUser() *User
+}
+
 type ResponseUser struct {
 	ID        uint      `json:"id"`
 	Username  string    `json:"username"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type CreateUser struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
+type UserBase struct {
+	Username string `json:"username" validate:"required,min=4,max=16"`
 }
 
-func (cr *CreateUser) ToUser() *User {
+type CreateUser struct {
+	UserBase
+	Password string `json:"password" validate:"required,min=6,max=128"`
+}
+
+func (cu *CreateUser) ToUser() *User {
 	return &User{
-		Username: cr.Username,
-		Password: cr.Password,
+		Username: cu.Username,
+		Password: cu.Password,
+	}
+}
+
+type UpdateUser struct {
+	UserBase
+}
+
+func (uu *UpdateUser) ToUser() *User {
+	return &User{
+		Username: uu.Username,
 	}
 }
 
 type User struct {
-	ID        uint      `json:"id" binding:"-"`
-	Username  string    `json:"username" binding:"required"`
-	Password  string    `json:"password" binding:"required"`
-	CreatedAt time.Time `json:"created_at" binding:"-"`
+	ID        uint      `json:"id"`
+	Username  string    `json:"username"`
+	Password  string    `json:"password"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func (u *User) ToResponseUser() *ResponseUser {

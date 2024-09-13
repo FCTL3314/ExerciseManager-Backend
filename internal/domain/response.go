@@ -42,4 +42,8 @@ var (
 		Detail:   "Not found",
 		Codename: "not_found",
 	}
+	InvalidURLParamErrorResponse = &ErrorResponse{
+		Detail:   "Invalid url param",
+		Codename: "invalid_url_param",
+	}
 )

@@ -4,8 +4,10 @@ import (
 	"ExerciseManager/internal/domain"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 	"net/http"
+	"strconv"
 )
 
 type UserController struct {
@@ -33,7 +35,9 @@ func (uc *UserController) Get(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	responseUser := user.ToResponseUser()
+
+	c.JSON(http.StatusOK, responseUser)
 }
 
 func (uc *UserController) List(c *gin.Context) {
@@ -84,13 +88,58 @@ func (uc *UserController) Create(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, createdUser)
+	responseUser := createdUser.ToResponseUser()
+
+	c.JSON(http.StatusCreated, responseUser)
 }
 
 func (uc *UserController) Update(c *gin.Context) {
-	uc.usecase.Update(&domain.User{})
+	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.InvalidURLParamErrorResponse)
+		return
+	}
+
+	var user domain.UpdateUser
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(user)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
+		return
+	}
+
+	updatedUser, err := uc.usecase.Update(uint(id), &user)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, domain.NotFoundResponse)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		return
+	}
+
+	responseUser := updatedUser.ToResponseUser()
+
+	c.JSON(http.StatusOK, responseUser)
 }
 
 func (uc *UserController) Delete(c *gin.Context) {
-	uc.usecase.Delete(0)
+	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.InvalidURLParamErrorResponse)
+		return
+	}
+
+	if err := uc.usecase.Delete(uint(id)); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, domain.NotFoundResponse)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+	}
 }

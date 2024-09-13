@@ -44,10 +44,31 @@ func (uu *UserUsecase) Create(createUser *domain.CreateUser) (*domain.User, erro
 	return &domain.User{}, &domain.ObjectUniqueConstraintError{Field: "username"}
 }
 
-func (uu *UserUsecase) Update(user *domain.User) (*domain.User, error) {
-	return uu.userRepository.Update(user)
+func (uu *UserUsecase) Update(id uint, updateUser *domain.UpdateUser) (*domain.User, error) {
+	userToUpdate := updateUser.ToUser()
+	userToUpdate.ID = id
+
+	if _, err := uu.userRepository.Get(
+		&domain.FilterParams{
+			Query: "id = ?",
+			Args:  []interface{}{userToUpdate.ID},
+		},
+	); err != nil {
+		return &domain.User{}, err
+	}
+
+	return uu.userRepository.Update(userToUpdate)
 }
 
 func (uu *UserUsecase) Delete(id uint) error {
+	if _, err := uu.userRepository.Get(
+		&domain.FilterParams{
+			Query: "id = ?",
+			Args:  []interface{}{id},
+		},
+	); err != nil {
+		return err
+	}
+
 	return uu.userRepository.Delete(id)
 }

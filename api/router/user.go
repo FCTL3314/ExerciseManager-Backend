@@ -43,9 +43,9 @@ func (ur *UserRouter) RegisterCreate() {
 }
 
 func (ur *UserRouter) RegisterUpdate() {
-	ur.router.PATCH("", ur.userController.Update)
+	ur.router.PATCH("/:id", ur.userController.Update)
 }
 
 func (ur *UserRouter) RegisterDelete() {
-	ur.router.DELETE("", ur.userController.Delete)
+	ur.router.DELETE("/:id", ur.userController.Delete)
 }
