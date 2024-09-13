@@ -1,4 +1,4 @@
-package route
+package router
 
 import (
 	"ExerciseManager/api/controller"
@@ -22,8 +22,16 @@ func NewUserRouter(router *gin.RouterGroup, db *gorm.DB) *UserRouter {
 	return &UserRouter{router, db, userController}
 }
 
-func (ur *UserRouter) RegisterGet() {
+func (ur *UserRouter) RegisterAll() {
+	ur.RegisterGet()
+	ur.RegisterList()
+	ur.RegisterCreate()
+	ur.RegisterUpdate()
+	ur.RegisterDelete()
+}
 
+func (ur *UserRouter) RegisterGet() {
+	ur.router.GET("/stub1", ur.userController.Get)
 }
 
 func (ur *UserRouter) RegisterList() {
@@ -31,13 +39,13 @@ func (ur *UserRouter) RegisterList() {
 }
 
 func (ur *UserRouter) RegisterCreate() {
-
+	ur.router.GET("/stub2", ur.userController.Create)
 }
 
 func (ur *UserRouter) RegisterUpdate() {
-
+	ur.router.GET("/stub3", ur.userController.Update)
 }
 
 func (ur *UserRouter) RegisterDelete() {
-
+	ur.router.GET("/stub4", ur.userController.Delete)
 }

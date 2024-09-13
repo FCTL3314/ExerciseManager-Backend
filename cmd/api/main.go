@@ -1,8 +1,9 @@
 package main
 
 import (
-	"ExerciseManager/api/route"
+	"ExerciseManager/api/router"
 	"ExerciseManager/bootstrap"
+	"log"
 )
 
 func main() {
@@ -11,9 +12,9 @@ func main() {
 	db := app.DB
 	cfg := app.Cfg
 
-	route.Register(g, db)
+	router.RegisterRoutes(g, db)
 
 	if err := g.Run(cfg.Server.Address); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }

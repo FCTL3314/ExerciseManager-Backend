@@ -3,6 +3,7 @@ package domain
 type Repository[T any] interface {
 	Getter[T]
 	Creator[T]
+	Updater[T]
 	Lister[T]
 	Deleter[T]
 }

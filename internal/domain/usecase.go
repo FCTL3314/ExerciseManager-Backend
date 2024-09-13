@@ -2,8 +2,9 @@ package domain
 
 type Usecase[T any] interface {
 	Getter[T]
-	Creator[T]
 	Lister[T]
+	Creator[T]
+	Updater[T]
 	Deleter[T]
 }
 

@@ -15,8 +15,13 @@ type CreateRouter interface {
 type UpdateRouter interface {
 	RegisterUpdate()
 }
+
 type DeleteRouter interface {
 	RegisterDelete()
+}
+
+type AllRouter interface {
+	RegisterAll()
 }
 
 type Router interface {
@@ -25,4 +30,5 @@ type Router interface {
 	CreateRouter
 	UpdateRouter
 	DeleteRouter
+	AllRouter
 }

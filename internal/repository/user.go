@@ -44,6 +44,14 @@ func (ur *UserRepository) List(params *domain.Params) ([]*domain.User, error) {
 }
 
 func (ur *UserRepository) Create(user *domain.User) (*domain.User, error) {
+	query := ur.db.Save(&user)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return user, nil
+}
+
+func (ur *UserRepository) Update(user *domain.User) (*domain.User, error) {
 	query := ur.db.Create(&user)
 	if query.Error != nil {
 		return nil, query.Error

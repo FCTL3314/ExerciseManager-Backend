@@ -25,11 +25,17 @@ func (uc *UserController) List(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, users)
+	responseUsers := domain.ToResponseUsers(users)
+
+	c.JSON(http.StatusOK, responseUsers)
 }
 
 func (uc *UserController) Create(c *gin.Context) {
 	uc.userUsecase.Create(&domain.User{})
+}
+
+func (uc *UserController) Update(c *gin.Context) {
+	uc.userUsecase.Update(&domain.User{})
 }
 
 func (uc *UserController) Delete(c *gin.Context) {

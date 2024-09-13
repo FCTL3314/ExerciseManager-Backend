@@ -13,24 +13,39 @@ type Application struct {
 }
 
 func NewApplication() *Application {
+	var app Application
+	app.initConfig()
+	app.initDB()
+	app.setGinMode()
+	app.initGin()
+	return &app
+}
+
+func (app *Application) initConfig() {
 	c, err := NewConfig()
 	if err != nil {
 		log.Fatal("Error during config loading. Please check if environmental files exist.")
 	}
+	app.Cfg = c
+}
 
+func (app *Application) initDB() {
 	DBConnector := NewConnector(
-		c.DB.Name,
-		c.DB.User,
-		c.DB.Password,
-		c.DB.Host,
-		c.DB.Port,
+		app.Cfg.DB.Name,
+		app.Cfg.DB.User,
+		app.Cfg.DB.Password,
+		app.Cfg.DB.Host,
+		app.Cfg.DB.Port,
 	)
 	db, err := DBConnector.Connect()
 	if err != nil {
 		log.Fatal("Error during database connection.")
 	}
+	app.DB = db
+}
 
-	switch c.Server.Mode {
+func (app *Application) setGinMode() {
+	switch app.Cfg.Server.Mode {
 	case "release":
 		gin.SetMode(gin.ReleaseMode)
 	case "test":
@@ -38,11 +53,12 @@ func NewApplication() *Application {
 	default:
 		gin.SetMode(gin.DebugMode)
 	}
+}
 
-	r := gin.Default()
-	if err := r.SetTrustedProxies(c.Server.TrustedProxies); err != nil {
-		panic(err)
+func (app *Application) initGin() {
+	g := gin.Default()
+	if err := g.SetTrustedProxies(app.Cfg.Server.TrustedProxies); err != nil {
+		log.Fatal(err)
 	}
-
-	return &Application{r, db, c}
+	app.Gin = g
 }

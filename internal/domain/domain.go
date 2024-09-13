@@ -12,6 +12,10 @@ type Creator[T any] interface {
 	Create(entity *T) (*T, error)
 }
 
+type Updater[T any] interface {
+	Update(entity *T) (*T, error)
+}
+
 type Deleter[T any] interface {
 	Delete(id uint) error
 }

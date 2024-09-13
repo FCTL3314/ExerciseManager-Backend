@@ -1,6 +1,8 @@
 package usecase
 
-import "ExerciseManager/internal/domain"
+import (
+	"ExerciseManager/internal/domain"
+)
 
 type UserUsecase struct {
 	userRepository domain.UserRepository
@@ -20,6 +22,10 @@ func (uu *UserUsecase) List(params *domain.Params) ([]*domain.User, error) {
 
 func (uu *UserUsecase) Create(user *domain.User) (*domain.User, error) {
 	return uu.userRepository.Create(user)
+}
+
+func (uu *UserUsecase) Update(user *domain.User) (*domain.User, error) {
+	return uu.userRepository.Update(user)
 }
 
 func (uu *UserUsecase) Delete(id uint) error {
