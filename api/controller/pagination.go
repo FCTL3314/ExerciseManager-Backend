@@ -20,7 +20,7 @@ func handlePaginationLimitExceededError(c *gin.Context, err error) bool {
 			return true
 		}
 
-		c.JSON(http.StatusInternalServerError, domain.InternalServerError)
+		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
 		return true
 	}
 	return false

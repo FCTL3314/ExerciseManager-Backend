@@ -34,8 +34,12 @@ func NewUniqueConstraintErrorResponse(detail string) *ErrorResponse {
 }
 
 var (
-	InternalServerError = ErrorResponse{
+	InternalServerErrorResponse = ErrorResponse{
 		Detail:   "Internal Server Error",
 		Codename: "internal_server_error",
+	}
+	NotFoundResponse = &ErrorResponse{
+		Detail:   "Not found",
+		Codename: "not_found",
 	}
 )

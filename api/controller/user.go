@@ -4,6 +4,7 @@ import (
 	"ExerciseManager/internal/domain"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 )
 
@@ -16,7 +17,23 @@ func NewUserController(usecase domain.UserUsecase) *UserController {
 }
 
 func (uc *UserController) Get(c *gin.Context) {
-	uc.usecase.Get(&domain.FilterParams{})
+	user, err := uc.usecase.Get(
+		&domain.FilterParams{
+			Query: "id = ?",
+			Args:  []interface{}{c.Param("id")},
+		},
+	)
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, domain.NotFoundResponse)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
 }
 
 func (uc *UserController) List(c *gin.Context) {
@@ -31,7 +48,7 @@ func (uc *UserController) List(c *gin.Context) {
 
 	paginatedResult, err := uc.usecase.List(&params)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.InternalServerError)
+		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
 		return
 	}
 
@@ -63,7 +80,7 @@ func (uc *UserController) Create(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, domain.InternalServerError)
+		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
 		return
 	}
 

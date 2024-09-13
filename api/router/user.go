@@ -31,7 +31,7 @@ func (ur *UserRouter) RegisterAll() {
 }
 
 func (ur *UserRouter) RegisterGet() {
-	ur.router.GET("/stub1", ur.userController.Get)
+	ur.router.GET("/:id", ur.userController.Get)
 }
 
 func (ur *UserRouter) RegisterList() {
@@ -43,9 +43,9 @@ func (ur *UserRouter) RegisterCreate() {
 }
 
 func (ur *UserRouter) RegisterUpdate() {
-	ur.router.GET("/stub3", ur.userController.Update)
+	ur.router.PATCH("", ur.userController.Update)
 }
 
 func (ur *UserRouter) RegisterDelete() {
-	ur.router.GET("/stub4", ur.userController.Delete)
+	ur.router.DELETE("", ur.userController.Delete)
 }
