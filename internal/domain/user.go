@@ -40,6 +40,11 @@ func (uu *UpdateUser) ToUser() *User {
 	}
 }
 
+func (uu *UpdateUser) ApplyToUser(user *User) *User {
+	user.Username = uu.Username
+	return user
+}
+
 type User struct {
 	ID        uint      `json:"id"`
 	Username  string    `json:"username"`

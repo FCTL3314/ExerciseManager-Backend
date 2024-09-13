@@ -13,6 +13,13 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
+func (ur *UserRepository) GetById(id uint) (*domain.User, error) {
+	return ur.Get(&domain.FilterParams{
+		Query: "id = ?",
+		Args:  []interface{}{id},
+	})
+}
+
 func (ur *UserRepository) Get(params *domain.FilterParams) (*domain.User, error) {
 	var user domain.User
 	query := ur.db.Where(params.Query, params.Args...).First(&user)

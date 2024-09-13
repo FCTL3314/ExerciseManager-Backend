@@ -45,28 +45,18 @@ func (uu *UserUsecase) Create(createUser *domain.CreateUser) (*domain.User, erro
 }
 
 func (uu *UserUsecase) Update(id uint, updateUser *domain.UpdateUser) (*domain.User, error) {
-	userToUpdate := updateUser.ToUser()
-	userToUpdate.ID = id
-
-	if _, err := uu.userRepository.Get(
-		&domain.FilterParams{
-			Query: "id = ?",
-			Args:  []interface{}{userToUpdate.ID},
-		},
-	); err != nil {
+	existedUser, err := uu.userRepository.GetById(id)
+	if err != nil {
 		return &domain.User{}, err
 	}
 
-	return uu.userRepository.Update(userToUpdate)
+	updateUser.ApplyToUser(existedUser)
+
+	return uu.userRepository.Update(existedUser)
 }
 
 func (uu *UserUsecase) Delete(id uint) error {
-	if _, err := uu.userRepository.Get(
-		&domain.FilterParams{
-			Query: "id = ?",
-			Args:  []interface{}{id},
-		},
-	); err != nil {
+	if _, err := uu.userRepository.GetById(id); err != nil {
 		return err
 	}
 

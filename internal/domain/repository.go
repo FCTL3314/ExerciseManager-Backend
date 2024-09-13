@@ -1,5 +1,9 @@
 package domain
 
+type GetterById[T any] interface {
+	GetById(id uint) (*T, error)
+}
+
 type Getter[T any] interface {
 	Get(params *FilterParams) (*T, error)
 }
@@ -25,6 +29,7 @@ type Counter[T any] interface {
 }
 
 type Repository[T any] interface {
+	GetterById[T]
 	Getter[T]
 	Fetcher[T]
 	Creator[T]
