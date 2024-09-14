@@ -4,6 +4,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"runtime/debug"
 )
 
 type Logger interface {
@@ -26,11 +27,13 @@ func (l *SlogLogger) Info(msg string, args ...any) {
 }
 
 func (l *SlogLogger) Warn(msg string, args ...any) {
-	l.logger.Warn(msg, args...)
+	trace := debug.Stack()
+	l.logger.Warn(msg, append(args, "traceback", string(trace))...)
 }
 
 func (l *SlogLogger) Error(msg string, args ...any) {
-	l.logger.Error(msg, args...)
+	trace := debug.Stack()
+	l.logger.Error(msg, append(args, "traceback", string(trace))...)
 }
 
 type LoggerGroup struct {
@@ -60,4 +63,4 @@ func initLogger(logFilePath string) Logger {
 	}
 }
 
-func InitUserLogger() Logger { return initLogger("logs/controller.log") }
+func InitUserLogger() Logger { return initLogger("logs/controller.json") }

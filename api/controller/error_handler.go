@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"ExerciseManager/bootstrap"
 	"ExerciseManager/internal/domain"
 	"errors"
 	"github.com/gin-gonic/gin"
@@ -31,4 +32,12 @@ func tryToHandleErr(c *gin.Context, err error) (IsHandled bool) {
 	}
 
 	return false
+}
+
+func tryToHandleErrOrLog(c *gin.Context, err error, logger bootstrap.Logger) (IsHandled bool) {
+	if !tryToHandleErr(c, err) {
+		logger.Error(err.Error())
+		return false
+	}
+	return true
 }
