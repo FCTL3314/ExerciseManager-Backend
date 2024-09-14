@@ -8,13 +8,10 @@ import (
 
 func main() {
 	app := bootstrap.NewApplication()
-	r := app.Router
-	db := app.DB
-	cfg := app.Cfg
 
-	router.RegisterRoutes(r, db, cfg)
+	router.RegisterRoutes(app.Router, app.DB, app.Cfg, app.LoggerGroup)
 
-	if err := r.Run(cfg.Server.Address); err != nil {
+	if err := app.Router.Run(app.Cfg.Server.Address); err != nil {
 		log.Fatal(err)
 	}
 }

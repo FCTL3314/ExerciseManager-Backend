@@ -12,13 +12,23 @@ import (
 	"gorm.io/gorm"
 )
 
-func RegisterRoutes(gin *gin.Engine, db *gorm.DB, cfg *bootstrap.Config) {
+func RegisterRoutes(
+	gin *gin.Engine,
+	db *gorm.DB,
+	cfg *bootstrap.Config,
+	loggerGroup *bootstrap.LoggerGroup,
+) {
 	v1Router := gin.Group("/api/v1/")
 
-	registerUserRoutes(v1Router, db, cfg)
+	registerUserRoutes(v1Router, db, cfg, loggerGroup.User)
 }
 
-func registerUserRoutes(baseRouter *gin.RouterGroup, db *gorm.DB, cfg *bootstrap.Config) {
+func registerUserRoutes(
+	baseRouter *gin.RouterGroup,
+	db *gorm.DB,
+	cfg *bootstrap.Config,
+	logger *bootstrap.Logger,
+) {
 	usersRouter := baseRouter.Group("/users/")
 
 	userRepository := repository.NewUserRepository(db)
@@ -27,9 +37,11 @@ func registerUserRoutes(baseRouter *gin.RouterGroup, db *gorm.DB, cfg *bootstrap
 		accesscontrol.NewUserAccess(),
 		auth.NewBcryptPasswordHasher(),
 	)
+
 	userController := controller.NewDefaultUserController(
 		userUsecase,
 		validation.NewDefaultUserValidator(),
+		*logger,
 	)
 	userRouter := NewUserRouter(usersRouter, userController, cfg)
 

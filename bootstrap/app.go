@@ -7,9 +7,10 @@ import (
 )
 
 type Application struct {
-	Router *gin.Engine
-	DB     *gorm.DB
-	Cfg    *Config
+	Router      *gin.Engine
+	DB          *gorm.DB
+	Cfg         *Config
+	LoggerGroup *LoggerGroup
 }
 
 func NewApplication() *Application {
@@ -17,6 +18,7 @@ func NewApplication() *Application {
 	app.initConfig()
 	app.initDB()
 	app.initGin()
+	app.initLoggerGroup()
 	return &app
 }
 
@@ -62,4 +64,11 @@ func (app *Application) initGin() {
 		log.Fatal(err)
 	}
 	app.Router = r
+}
+
+func (app *Application) initLoggerGroup() {
+	userLogger := InitUserLogger()
+
+	loggerGroup := NewLoggerGroup(&userLogger)
+	app.LoggerGroup = loggerGroup
 }

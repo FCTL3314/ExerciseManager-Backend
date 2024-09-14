@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"ExerciseManager/bootstrap"
 	"ExerciseManager/internal/domain"
 	"ExerciseManager/internal/validation"
 	"github.com/gin-gonic/gin"
@@ -10,13 +11,19 @@ import (
 type DefaultUserController struct {
 	usecase   domain.UserUsecase
 	validator validation.UserValidator
+	Logger    bootstrap.Logger
 }
 
 func NewDefaultUserController(
 	usecase domain.UserUsecase,
 	validator validation.UserValidator,
+	logger bootstrap.Logger,
 ) *DefaultUserController {
-	return &DefaultUserController{usecase: usecase, validator: validator}
+	return &DefaultUserController{
+		usecase:   usecase,
+		validator: validator,
+		Logger:    logger,
+	}
 }
 
 func (uc *DefaultUserController) Me(c *gin.Context) {
