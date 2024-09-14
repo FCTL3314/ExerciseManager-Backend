@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"ExerciseManager/internal/domain"
-	"ExerciseManager/internal/token_util"
+	"ExerciseManager/internal/tokenutil"
 	"net/http"
 	"strings"
 
@@ -22,7 +22,7 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 
 		token := tokenParts[1]
 		schema := tokenParts[0]
-		authorized, _ := token_util.IsAuthorized(token, secret)
+		authorized, _ := tokenutil.IsAuthorized(token, secret)
 
 		if !authorized || schema != "Bearer" {
 			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsErrorResponse)
@@ -30,7 +30,7 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 			return
 		}
 
-		userID, err := token_util.ExtractIDFromToken(token, secret)
+		userID, err := tokenutil.ExtractIDFromToken(token, secret)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsErrorResponse)
 			c.Abort()

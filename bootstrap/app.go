@@ -7,16 +7,15 @@ import (
 )
 
 type Application struct {
-	Gin *gin.Engine
-	DB  *gorm.DB
-	Cfg *Config
+	Router *gin.Engine
+	DB     *gorm.DB
+	Cfg    *Config
 }
 
 func NewApplication() *Application {
 	var app Application
 	app.initConfig()
 	app.initDB()
-	app.setGinMode()
 	app.initGin()
 	return &app
 }
@@ -56,9 +55,11 @@ func (app *Application) setGinMode() {
 }
 
 func (app *Application) initGin() {
-	g := gin.Default()
-	if err := g.SetTrustedProxies(app.Cfg.Server.TrustedProxies); err != nil {
+	app.setGinMode()
+
+	r := gin.Default()
+	if err := r.SetTrustedProxies(app.Cfg.Server.TrustedProxies); err != nil {
 		log.Fatal(err)
 	}
-	app.Gin = g
+	app.Router = r
 }

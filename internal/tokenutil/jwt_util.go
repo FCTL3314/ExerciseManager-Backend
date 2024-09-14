@@ -1,4 +1,4 @@
-package token_util
+package tokenutil
 
 import (
 	"ExerciseManager/internal/domain"

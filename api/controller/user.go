@@ -100,10 +100,15 @@ func (uc *UserController) Create(c *gin.Context) {
 
 func (uc *UserController) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-
 	if err != nil {
 		c.JSON(http.StatusBadRequest, domain.InvalidURLParamErrorResponse)
 		return
+	}
+
+	authUserIdString := c.GetString("x-user-id")
+	authUserId, err := strconv.ParseUint(authUserIdString, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
 	}
 
 	var user domain.UpdateUser
@@ -118,10 +123,13 @@ func (uc *UserController) Update(c *gin.Context) {
 		return
 	}
 
-	updatedUser, err := uc.usecase.Update(uint(id), &user)
+	updatedUser, err := uc.usecase.Update(uint(authUserId), uint(id), &user)
 	if err != nil {
 		if errors.Is(err, domain.ErrObjectNotFound) {
 			c.JSON(http.StatusNotFound, domain.NotFoundResponse)
+			return
+		} else if errors.Is(err, domain.ErrAccessDenied) {
+			c.JSON(http.StatusForbidden, domain.ForbiddenResponse)
 			return
 		}
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
@@ -140,9 +148,18 @@ func (uc *UserController) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := uc.usecase.Delete(uint(id)); err != nil {
+	authUserIdString := c.GetString("x-user-id")
+	authUserId, err := strconv.ParseUint(authUserIdString, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+	}
+
+	if err := uc.usecase.Delete(uint(authUserId), uint(id)); err != nil {
 		if errors.Is(err, domain.ErrObjectNotFound) {
 			c.JSON(http.StatusNotFound, domain.NotFoundResponse)
+			return
+		} else if errors.Is(err, domain.ErrAccessDenied) {
+			c.JSON(http.StatusForbidden, domain.ForbiddenResponse)
 			return
 		}
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"ExerciseManager/internal/accesscontrol"
 	"ExerciseManager/internal/domain"
 	"errors"
 	"golang.org/x/crypto/bcrypt"
@@ -8,11 +9,12 @@ import (
 )
 
 type UserUsecase struct {
-	userRepository domain.UserRepository
+	userRepository    domain.UserRepository
+	userAccessChecker accesscontrol.UserChecker
 }
 
-func NewUserUsecase(userRepository domain.UserRepository) *UserUsecase {
-	return &UserUsecase{userRepository: userRepository}
+func NewUserUsecase(userRepository domain.UserRepository, userAccessChecker accesscontrol.UserChecker) *UserUsecase {
+	return &UserUsecase{userRepository: userRepository, userAccessChecker: userAccessChecker}
 }
 
 func (uu *UserUsecase) Get(params *domain.FilterParams) (*domain.User, error) {
@@ -57,7 +59,11 @@ func (uu *UserUsecase) Create(createUser *domain.CreateUser) (*domain.User, erro
 	return &domain.User{}, &domain.ErrObjectUniqueConstraint{Fields: []string{"username"}}
 }
 
-func (uu *UserUsecase) Update(id uint, updateUser *domain.UpdateUser) (*domain.User, error) {
+func (uu *UserUsecase) Update(authUserId uint, id uint, updateUser *domain.UpdateUser) (*domain.User, error) {
+	if err := uu.userAccessChecker.CanAccessUser(authUserId, id); err != nil {
+		return nil, domain.ErrAccessDenied
+	}
+
 	userToUpdate, err := uu.userRepository.GetById(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -71,7 +77,11 @@ func (uu *UserUsecase) Update(id uint, updateUser *domain.UpdateUser) (*domain.U
 	return uu.userRepository.Update(userToUpdate)
 }
 
-func (uu *UserUsecase) Delete(id uint) error {
+func (uu *UserUsecase) Delete(authUserId uint, id uint) error {
+	if err := uu.userAccessChecker.CanAccessUser(authUserId, id); err != nil {
+		return domain.ErrAccessDenied
+	}
+
 	if _, err := uu.userRepository.GetById(id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return domain.ErrObjectNotFound

@@ -8,13 +8,13 @@ import (
 
 func main() {
 	app := bootstrap.NewApplication()
-	g := app.Gin
+	r := app.Router
 	db := app.DB
 	cfg := app.Cfg
 
-	router.RegisterRoutes(g, db, cfg)
+	router.RegisterRoutes(r, db, cfg)
 
-	if err := g.Run(cfg.Server.Address); err != nil {
+	if err := r.Run(cfg.Server.Address); err != nil {
 		log.Fatal(err)
 	}
 }
