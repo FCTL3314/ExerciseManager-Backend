@@ -3,6 +3,7 @@ package usecase
 import (
 	"ExerciseManager/internal/domain"
 	"errors"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -40,6 +41,12 @@ func (uu *UserUsecase) List(params *domain.Params) (*domain.PaginatedResult[*dom
 }
 
 func (uu *UserUsecase) Create(createUser *domain.CreateUser) (*domain.User, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createUser.Password), 10)
+	if err != nil {
+		return &domain.User{}, err
+	}
+	createUser.Password = string(hashedPassword)
+
 	if _, err := uu.userRepository.GetByUsername(createUser.Username); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return uu.userRepository.Create(createUser.ToUser())

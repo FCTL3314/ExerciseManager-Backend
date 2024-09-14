@@ -4,6 +4,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+type Security struct {
+	JWTSecret string `mapstructure:"jwt_secret"`
+}
+
 type Server struct {
 	Mode           string   `mapstructure:"gin_mode"`
 	TrustedProxies []string `mapstructure:"trusted_proxies"`
@@ -19,6 +23,7 @@ type Database struct {
 }
 
 type Config struct {
+	Security
 	Server
 	DB Database
 }
@@ -56,6 +61,10 @@ func (cfg *Config) loadFromFile(Path string, ConfigType string) error {
 	}
 
 	if err := viper.Unmarshal(&cfg.Server); err != nil {
+		return err
+	}
+
+	if err := viper.Unmarshal(&cfg.Security); err != nil {
 		return err
 	}
 

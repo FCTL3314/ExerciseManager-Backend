@@ -42,8 +42,16 @@ var (
 		Detail:   "Not found",
 		Codename: "not_found",
 	}
+	ForbiddenResponse = &ErrorResponse{
+		Detail:   "Forbidden",
+		Codename: "forbidden",
+	}
 	InvalidURLParamErrorResponse = &ErrorResponse{
 		Detail:   "Invalid url param",
 		Codename: "invalid_url_param",
+	}
+	InvalidAuthCredentialsErrorResponse = &ErrorResponse{
+		Detail:   "Invalid authentication credentials provided",
+		Codename: "invalid_auth_credentials_error",
 	}
 )

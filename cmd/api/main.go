@@ -12,7 +12,7 @@ func main() {
 	db := app.DB
 	cfg := app.Cfg
 
-	router.RegisterRoutes(g, db)
+	router.RegisterRoutes(g, db, cfg)
 
 	if err := g.Run(cfg.Server.Address); err != nil {
 		log.Fatal(err)
