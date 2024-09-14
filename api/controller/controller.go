@@ -9,3 +9,8 @@ type Controller interface {
 	Update(c *gin.Context)
 	Delete(c *gin.Context)
 }
+
+type UserController interface {
+	Me(c *gin.Context)
+	Controller
+}

@@ -26,6 +26,18 @@ func NewUserUsecase(
 	}
 }
 
+func (uu *UserUsecase) GetById(id uint) (*domain.User, error) {
+	user, err := uu.userRepository.GetById(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, domain.ErrObjectNotFound
+		}
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (uu *UserUsecase) Get(params *domain.FilterParams) (*domain.User, error) {
 	user, err := uu.userRepository.Get(params)
 	if err != nil {

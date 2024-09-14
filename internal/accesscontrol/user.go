@@ -4,10 +4,13 @@ type UserChecker interface {
 	CanAccessUser(authenticatedUserID, targetUserID uint) bool
 }
 
-type User struct {
+type UserAccess struct{}
+
+func NewUserAccess() *UserAccess {
+	return &UserAccess{}
 }
 
-func (ac *User) CanAccessUser(authenticatedUserID, targetUserID uint) bool {
+func (ac *UserAccess) CanAccessUser(authenticatedUserID, targetUserID uint) bool {
 	if authenticatedUserID != targetUserID {
 		return false
 	}

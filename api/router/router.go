@@ -2,12 +2,12 @@ package router
 
 import (
 	"ExerciseManager/api/controller"
-	"ExerciseManager/api/middleware"
 	"ExerciseManager/bootstrap"
 	"ExerciseManager/internal/accesscontrol"
 	"ExerciseManager/internal/auth"
 	"ExerciseManager/internal/repository"
 	"ExerciseManager/internal/usecase"
+	"ExerciseManager/internal/validation"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -20,16 +20,18 @@ func RegisterRoutes(gin *gin.Engine, db *gorm.DB, cfg *bootstrap.Config) {
 
 func registerUserRoutes(baseRouter *gin.RouterGroup, db *gorm.DB, cfg *bootstrap.Config) {
 	usersRouter := baseRouter.Group("/users/")
-	usersRouter.Use(middleware.JwtAuthMiddleware(cfg.JWTSecret))
 
 	userRepository := repository.NewUserRepository(db)
 	userUsecase := usecase.NewUserUsecase(
 		userRepository,
-		&accesscontrol.User{},
-		&auth.BcryptPasswordHasher{},
+		accesscontrol.NewUserAccess(),
+		auth.NewBcryptPasswordHasher(),
 	)
-	userController := controller.NewUserController(userUsecase)
-	userRouter := NewUserRouter(usersRouter, userController)
+	userController := controller.NewDefaultUserController(
+		userUsecase,
+		validation.NewDefaultUserValidator(),
+	)
+	userRouter := NewUserRouter(usersRouter, userController, cfg)
 
 	userRouter.RegisterAll()
 }

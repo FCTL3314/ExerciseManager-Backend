@@ -1,6 +1,7 @@
 package domain
 
 type UserUsecase interface {
+	GetById(id uint) (*User, error)
 	Get(params *FilterParams) (*User, error)
 	List(params *Params) (*PaginatedResult[*User], error)
 	Create(createUser *CreateUser) (*User, error)

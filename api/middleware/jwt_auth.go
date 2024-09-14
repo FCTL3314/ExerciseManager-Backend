@@ -4,6 +4,7 @@ import (
 	"ExerciseManager/internal/domain"
 	"ExerciseManager/internal/tokenutil"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -30,13 +31,19 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 			return
 		}
 
-		userID, err := tokenutil.ExtractIDFromToken(token, secret)
+		userIDString, err := tokenutil.ExtractIDFromToken(token, secret)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsErrorResponse)
 			c.Abort()
 			return
 		}
-		c.Set("x-user-id", userID)
+
+		userID, err := strconv.ParseUint(userIDString, 10, 64)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsErrorResponse)
+		}
+
+		c.Set("x-user-id", uint(userID))
 		c.Next()
 	}
 }

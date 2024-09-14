@@ -2,28 +2,29 @@ package controller
 
 import (
 	"ExerciseManager/internal/domain"
+	"ExerciseManager/internal/validation"
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"net/http"
 	"strconv"
 )
 
-type UserController struct {
-	usecase domain.UserUsecase
+type DefaultUserController struct {
+	usecase   domain.UserUsecase
+	validator validation.UserValidator
 }
 
-func NewUserController(usecase domain.UserUsecase) *UserController {
-	return &UserController{usecase: usecase}
+func NewDefaultUserController(
+	usecase domain.UserUsecase,
+	validator validation.UserValidator,
+) *DefaultUserController {
+	return &DefaultUserController{usecase: usecase, validator: validator}
 }
 
-func (uc *UserController) Get(c *gin.Context) {
-	user, err := uc.usecase.Get(
-		&domain.FilterParams{
-			Query: "id = ?",
-			Args:  []interface{}{c.Param("id")},
-		},
-	)
+func (uc *DefaultUserController) Me(c *gin.Context) {
+	authUserId := c.GetUint("x-user-id")
+
+	user, err := uc.usecase.GetById(authUserId)
 
 	if err != nil {
 		if errors.Is(err, domain.ErrObjectNotFound) {
@@ -39,7 +40,30 @@ func (uc *UserController) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, responseUser)
 }
 
-func (uc *UserController) List(c *gin.Context) {
+func (uc *DefaultUserController) Get(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, domain.InvalidURLParamErrorResponse)
+		return
+	}
+
+	user, err := uc.usecase.GetById(uint(id))
+
+	if err != nil {
+		if errors.Is(err, domain.ErrObjectNotFound) {
+			c.JSON(http.StatusNotFound, domain.NotFoundResponse)
+			return
+		}
+		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		return
+	}
+
+	responseUser := user.ToResponseUser()
+
+	c.JSON(http.StatusOK, responseUser)
+}
+
+func (uc *DefaultUserController) List(c *gin.Context) {
 	paginationParams, err := getUserPaginationParams(c)
 	if handlePaginationLimitExceededError(c, err) {
 		return
@@ -67,15 +91,14 @@ func (uc *UserController) List(c *gin.Context) {
 	c.JSON(http.StatusOK, paginatedResponse)
 }
 
-func (uc *UserController) Create(c *gin.Context) {
+func (uc *DefaultUserController) Create(c *gin.Context) {
 	var user domain.CreateUser
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
 		return
 	}
 
-	validate := validator.New()
-	if err := validate.Struct(user); err != nil {
+	if err := uc.validator.ValidateCreateUser(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
 		return
 	}
@@ -98,18 +121,14 @@ func (uc *UserController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, responseUser)
 }
 
-func (uc *UserController) Update(c *gin.Context) {
+func (uc *DefaultUserController) Update(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, domain.InvalidURLParamErrorResponse)
 		return
 	}
 
-	authUserIdString := c.GetString("x-user-id")
-	authUserId, err := strconv.ParseUint(authUserIdString, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
-	}
+	authUserId := c.GetUint("x-user-id")
 
 	var user domain.UpdateUser
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -117,8 +136,7 @@ func (uc *UserController) Update(c *gin.Context) {
 		return
 	}
 
-	validate := validator.New()
-	if err = validate.Struct(user); err != nil {
+	if err := uc.validator.ValidateUpdateUser(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
 		return
 	}
@@ -141,7 +159,7 @@ func (uc *UserController) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, responseUser)
 }
 
-func (uc *UserController) Delete(c *gin.Context) {
+func (uc *DefaultUserController) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, domain.InvalidURLParamErrorResponse)
