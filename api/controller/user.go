@@ -3,10 +3,8 @@ package controller
 import (
 	"ExerciseManager/internal/domain"
 	"ExerciseManager/internal/validation"
-	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 )
 
 type DefaultUserController struct {
@@ -27,8 +25,7 @@ func (uc *DefaultUserController) Me(c *gin.Context) {
 	user, err := uc.usecase.GetById(authUserId)
 
 	if err != nil {
-		if errors.Is(err, domain.ErrObjectNotFound) {
-			c.JSON(http.StatusNotFound, domain.NotFoundResponse)
+		if tryToHandleErr(c, err) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
@@ -36,22 +33,19 @@ func (uc *DefaultUserController) Me(c *gin.Context) {
 	}
 
 	responseUser := user.ToResponseUser()
-
 	c.JSON(http.StatusOK, responseUser)
 }
 
 func (uc *DefaultUserController) Get(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, domain.InvalidURLParamErrorResponse)
+	Id, IsFound := tryToGetIdParamOrBadRequest(c, "id")
+	if !IsFound {
 		return
 	}
 
-	user, err := uc.usecase.GetById(uint(id))
+	user, err := uc.usecase.GetById(Id)
 
 	if err != nil {
-		if errors.Is(err, domain.ErrObjectNotFound) {
-			c.JSON(http.StatusNotFound, domain.NotFoundResponse)
+		if tryToHandleErr(c, err) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
@@ -59,13 +53,16 @@ func (uc *DefaultUserController) Get(c *gin.Context) {
 	}
 
 	responseUser := user.ToResponseUser()
-
 	c.JSON(http.StatusOK, responseUser)
 }
 
 func (uc *DefaultUserController) List(c *gin.Context) {
 	paginationParams, err := getUserPaginationParams(c)
-	if handlePaginationLimitExceededError(c, err) {
+	if err != nil {
+		if tryToHandleErr(c, err) {
+			return
+		}
+		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
 		return
 	}
 
@@ -105,13 +102,9 @@ func (uc *DefaultUserController) Create(c *gin.Context) {
 
 	createdUser, err := uc.usecase.Create(&user)
 	if err != nil {
-
-		var uniqueConstraintErr *domain.ErrObjectUniqueConstraint
-		if errors.As(err, &uniqueConstraintErr) {
-			c.JSON(http.StatusConflict, domain.NewUniqueConstraintErrorResponse(err.Error()))
+		if tryToHandleErr(c, err) {
 			return
 		}
-
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
 		return
 	}
@@ -122,9 +115,8 @@ func (uc *DefaultUserController) Create(c *gin.Context) {
 }
 
 func (uc *DefaultUserController) Update(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, domain.InvalidURLParamErrorResponse)
+	Id, IsFound := tryToGetIdParamOrBadRequest(c, "id")
+	if !IsFound {
 		return
 	}
 
@@ -141,13 +133,9 @@ func (uc *DefaultUserController) Update(c *gin.Context) {
 		return
 	}
 
-	updatedUser, err := uc.usecase.Update(uint(authUserId), uint(id), &user)
+	updatedUser, err := uc.usecase.Update(authUserId, Id, &user)
 	if err != nil {
-		if errors.Is(err, domain.ErrObjectNotFound) {
-			c.JSON(http.StatusNotFound, domain.NotFoundResponse)
-			return
-		} else if errors.Is(err, domain.ErrAccessDenied) {
-			c.JSON(http.StatusForbidden, domain.ForbiddenResponse)
+		if tryToHandleErr(c, err) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
@@ -160,27 +148,19 @@ func (uc *DefaultUserController) Update(c *gin.Context) {
 }
 
 func (uc *DefaultUserController) Delete(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 0)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, domain.InvalidURLParamErrorResponse)
+	Id, IsFound := tryToGetIdParamOrBadRequest(c, "id")
+	if !IsFound {
 		return
 	}
 
-	authUserIdString := c.GetString("x-user-id")
-	authUserId, err := strconv.ParseUint(authUserIdString, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
-	}
+	authUserId := c.GetUint("x-user-id")
 
-	if err := uc.usecase.Delete(uint(authUserId), uint(id)); err != nil {
-		if errors.Is(err, domain.ErrObjectNotFound) {
-			c.JSON(http.StatusNotFound, domain.NotFoundResponse)
-			return
-		} else if errors.Is(err, domain.ErrAccessDenied) {
-			c.JSON(http.StatusForbidden, domain.ForbiddenResponse)
+	if err := uc.usecase.Delete(authUserId, Id); err != nil {
+		if tryToHandleErr(c, err) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		return
 	}
 	c.Status(http.StatusNoContent)
 }

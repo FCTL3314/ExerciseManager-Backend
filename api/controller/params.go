@@ -2,28 +2,18 @@ package controller
 
 import (
 	"ExerciseManager/internal/domain"
-	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 )
 
-const (
-	MaxUserPaginationLimit = 32
-)
-
-func handlePaginationLimitExceededError(c *gin.Context, err error) bool {
+func tryToGetIdParamOrBadRequest(c *gin.Context, param string) (Id uint, IsFound bool) {
+	id, err := strconv.ParseUint(c.Param(param), 10, 64)
 	if err != nil {
-		var limitErr *domain.ErrPaginationLimitExceeded
-		if errors.As(err, &limitErr) {
-			c.JSON(http.StatusBadRequest, domain.NewPaginationErrorResponse(limitErr.Error()))
-			return true
-		}
-
-		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
-		return true
+		c.JSON(http.StatusBadRequest, domain.InvalidURLParamErrorResponse)
+		return 0, false
 	}
-	return false
+	return uint(id), true
 }
 
 func getPaginationParams(c *gin.Context, maxLimit int) (domain.PaginationParams, error) {
@@ -49,5 +39,5 @@ func getPaginationParams(c *gin.Context, maxLimit int) (domain.PaginationParams,
 }
 
 func getUserPaginationParams(c *gin.Context) (domain.PaginationParams, error) {
-	return getPaginationParams(c, MaxUserPaginationLimit)
+	return getPaginationParams(c, domain.MaxUserPaginationLimit)
 }
