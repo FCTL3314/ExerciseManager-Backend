@@ -1,24 +1,30 @@
 package domain
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 )
 
-type PaginationLimitExceededError struct {
+var (
+	ErrObjectNotFound = errors.New("object not found")
+)
+
+type ErrPaginationLimitExceeded struct {
 	MaxLimit int
 }
 
-func (e *PaginationLimitExceededError) Error() string {
+func (e *ErrPaginationLimitExceeded) Error() string {
 	return fmt.Sprintf("Pagination limit exceeded, maximum allowed limit is %d", e.MaxLimit)
 }
 
-type ObjectUniqueConstraintError struct {
-	Field string
+type ErrObjectUniqueConstraint struct {
+	Fields []string
 }
 
-func (e *ObjectUniqueConstraintError) Error() string {
+func (e *ErrObjectUniqueConstraint) Error() string {
 	return fmt.Sprintf(
-		"Unique constraint violation on field \"%s\". An object with this value already exists.",
-		e.Field,
+		"Unique constraint violation on fields \"%s\". An object with values for these fields already exists.",
+		strings.Join(e.Fields, ","),
 	)
 }

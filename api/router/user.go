@@ -2,24 +2,19 @@ package router
 
 import (
 	"ExerciseManager/api/controller"
-	"ExerciseManager/internal/repository"
-	"ExerciseManager/internal/usecase"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 type UserRouter struct {
 	router         *gin.RouterGroup
-	db             *gorm.DB
 	userController *controller.UserController
 }
 
-func NewUserRouter(router *gin.RouterGroup, db *gorm.DB) *UserRouter {
-	userRepository := repository.NewUserRepository(db)
-	userUsecase := usecase.NewUserUsecase(userRepository)
-	userController := controller.NewUserController(userUsecase)
-
-	return &UserRouter{router, db, userController}
+func NewUserRouter(
+	router *gin.RouterGroup,
+	userController *controller.UserController,
+) *UserRouter {
+	return &UserRouter{router, userController}
 }
 
 func (ur *UserRouter) RegisterAll() {

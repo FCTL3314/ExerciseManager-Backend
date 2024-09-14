@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"gorm.io/gorm"
 	"net/http"
 	"strconv"
 )
@@ -27,7 +26,7 @@ func (uc *UserController) Get(c *gin.Context) {
 	)
 
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, domain.ErrObjectNotFound) {
 			c.JSON(http.StatusNotFound, domain.NotFoundResponse)
 			return
 		}
@@ -84,7 +83,7 @@ func (uc *UserController) Create(c *gin.Context) {
 	createdUser, err := uc.usecase.Create(&user)
 	if err != nil {
 
-		var uniqueConstraintErr *domain.ObjectUniqueConstraintError
+		var uniqueConstraintErr *domain.ErrObjectUniqueConstraint
 		if errors.As(err, &uniqueConstraintErr) {
 			c.JSON(http.StatusConflict, domain.NewUniqueConstraintErrorResponse(err.Error()))
 			return
@@ -120,7 +119,7 @@ func (uc *UserController) Update(c *gin.Context) {
 
 	updatedUser, err := uc.usecase.Update(uint(id), &user)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, domain.ErrObjectNotFound) {
 			c.JSON(http.StatusNotFound, domain.NotFoundResponse)
 			return
 		}
@@ -141,10 +140,11 @@ func (uc *UserController) Delete(c *gin.Context) {
 	}
 
 	if err := uc.usecase.Delete(uint(id)); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, domain.ErrObjectNotFound) {
 			c.JSON(http.StatusNotFound, domain.NotFoundResponse)
 			return
 		}
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
 	}
+	c.Status(http.StatusNoContent)
 }

@@ -14,7 +14,7 @@ const (
 
 func handlePaginationLimitExceededError(c *gin.Context, err error) bool {
 	if err != nil {
-		var limitErr *domain.PaginationLimitExceededError
+		var limitErr *domain.ErrPaginationLimitExceeded
 		if errors.As(err, &limitErr) {
 			c.JSON(http.StatusBadRequest, domain.NewPaginationErrorResponse(limitErr.Error()))
 			return true
@@ -34,7 +34,7 @@ func getPaginationParams(c *gin.Context, maxLimit int) (domain.PaginationParams,
 	if err != nil || limit <= 0 {
 		limit = 10
 	} else if limit > maxLimit {
-		return domain.PaginationParams{}, &domain.PaginationLimitExceededError{MaxLimit: maxLimit}
+		return domain.PaginationParams{}, &domain.ErrPaginationLimitExceeded{MaxLimit: maxLimit}
 	}
 
 	offset, err := strconv.Atoi(offsetStr)

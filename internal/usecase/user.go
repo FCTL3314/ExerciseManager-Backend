@@ -15,7 +15,14 @@ func NewUserUsecase(userRepository domain.UserRepository) *UserUsecase {
 }
 
 func (uu *UserUsecase) Get(params *domain.FilterParams) (*domain.User, error) {
-	return uu.userRepository.Get(params)
+	user, err := uu.userRepository.Get(params)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, domain.ErrObjectNotFound
+		}
+		return nil, err
+	}
+	return user, nil
 }
 
 func (uu *UserUsecase) List(params *domain.Params) (*domain.PaginatedResult[*domain.User], error) {
@@ -33,30 +40,35 @@ func (uu *UserUsecase) List(params *domain.Params) (*domain.PaginatedResult[*dom
 }
 
 func (uu *UserUsecase) Create(createUser *domain.CreateUser) (*domain.User, error) {
-	_, err := uu.userRepository.GetByUsername(createUser.Username)
-	if err != nil {
+	if _, err := uu.userRepository.GetByUsername(createUser.Username); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return uu.userRepository.Create(createUser.ToUser())
 		}
-		return &domain.User{}, err
+		return nil, err
 	}
 
-	return &domain.User{}, &domain.ObjectUniqueConstraintError{Field: "username"}
+	return &domain.User{}, &domain.ErrObjectUniqueConstraint{Fields: []string{"username"}}
 }
 
 func (uu *UserUsecase) Update(id uint, updateUser *domain.UpdateUser) (*domain.User, error) {
-	existedUser, err := uu.userRepository.GetById(id)
+	userToUpdate, err := uu.userRepository.GetById(id)
 	if err != nil {
-		return &domain.User{}, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, domain.ErrObjectNotFound
+		}
+		return nil, err
 	}
 
-	updateUser.ApplyToUser(existedUser)
+	updateUser.ApplyToUser(userToUpdate)
 
-	return uu.userRepository.Update(existedUser)
+	return uu.userRepository.Update(userToUpdate)
 }
 
 func (uu *UserUsecase) Delete(id uint) error {
 	if _, err := uu.userRepository.GetById(id); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return domain.ErrObjectNotFound
+		}
 		return err
 	}
 
