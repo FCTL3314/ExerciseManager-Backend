@@ -72,7 +72,8 @@ func (uu *UserUsecase) Create(createUser *domain.CreateUser) (*domain.User, erro
 
 	if _, err := uu.userRepository.GetByUsername(createUser.Username); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return uu.userRepository.Create(createUser.ToUser())
+			user := createUser.ToUser()
+			return uu.userRepository.Create(user)
 		}
 		return nil, err
 	}

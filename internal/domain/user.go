@@ -18,31 +18,34 @@ type UserBase struct {
 	Username string `json:"username" validate:"required,min=4,max=16"`
 }
 
+func (ub *UserBase) ToUser() *User {
+	return &User{
+		Username: ub.Username,
+	}
+}
+
+func (ub *UserBase) ApplyToUser(user *User) *User {
+	user.Username = ub.Username
+	return user
+}
+
 type CreateUser struct {
 	UserBase
 	Password string `json:"password" validate:"required,min=6,max=128"`
 }
 
 func (cu *CreateUser) ToUser() *User {
-	return &User{
-		Username: cu.Username,
-		Password: cu.Password,
-	}
+	user := cu.UserBase.ToUser()
+	user.Password = cu.Password
+	return user
 }
 
 type UpdateUser struct {
 	UserBase
 }
 
-func (uu *UpdateUser) ToUser() *User {
-	return &User{
-		Username: uu.Username,
-	}
-}
-
-func (uu *UpdateUser) ApplyToUser(user *User) *User {
-	user.Username = uu.Username
-	return user
+type LoginUser struct {
+	CreateUser
 }
 
 type User struct {

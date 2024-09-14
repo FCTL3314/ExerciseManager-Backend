@@ -27,7 +27,7 @@ func tryToHandleErr(c *gin.Context, err error) (IsHandled bool) {
 	var uniqueConstraintErr *domain.ErrObjectUniqueConstraint
 	if errors.As(err, &uniqueConstraintErr) {
 		c.JSON(http.StatusConflict, domain.NewUniqueConstraintErrorResponse(err.Error()))
-		return
+		return true
 	}
 
 	return false
