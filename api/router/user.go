@@ -9,13 +9,13 @@ import (
 
 type UserRouter struct {
 	router         *gin.RouterGroup
-	userController controller.UserController
+	userController controller.IUserController
 	cfg            *bootstrap.Config
 }
 
 func NewUserRouter(
 	router *gin.RouterGroup,
-	userController *controller.DefaultUserController,
+	userController *controller.UserController,
 	cfg *bootstrap.Config,
 ) *UserRouter {
 	return &UserRouter{router, userController, cfg}
@@ -26,6 +26,7 @@ func (ur *UserRouter) RegisterAll() {
 	ur.RegisterGet()
 	ur.RegisterList()
 	ur.RegisterCreate()
+	ur.RegisterLogin()
 	ur.RegisterUpdate()
 	ur.RegisterDelete()
 }
@@ -44,6 +45,10 @@ func (ur *UserRouter) RegisterList() {
 
 func (ur *UserRouter) RegisterCreate() {
 	ur.router.POST("", ur.userController.Create)
+}
+
+func (ur *UserRouter) RegisterLogin() {
+	ur.router.POST("/login", ur.userController.Login)
 }
 
 func (ur *UserRouter) RegisterUpdate() {

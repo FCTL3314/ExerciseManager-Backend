@@ -13,6 +13,39 @@ import (
 	"gorm.io/gorm"
 )
 
+type GetRouter interface {
+	RegisterGet()
+}
+
+type ListRouter interface {
+	RegisterList()
+}
+
+type CreateRouter interface {
+	RegisterCreate()
+}
+
+type UpdateRouter interface {
+	RegisterUpdate()
+}
+
+type DeleteRouter interface {
+	RegisterDelete()
+}
+
+type AllRouter interface {
+	RegisterAll()
+}
+
+type Router interface {
+	GetRouter
+	ListRouter
+	CreateRouter
+	UpdateRouter
+	DeleteRouter
+	AllRouter
+}
+
 func RegisterRoutes(
 	gin *gin.Engine,
 	db *gorm.DB,
@@ -37,10 +70,11 @@ func registerUserRoutes(
 		userRepository,
 		accesscontrol.NewUserAccess(),
 		auth.NewBcryptPasswordHasher(),
+		cfg,
 	)
-	userController := controller.NewDefaultUserController(
+	userController := controller.NewUserController(
 		userUsecase,
-		validation.NewDefaultUserValidator(),
+		validation.NewUserValidator(),
 		logger,
 	)
 	userRouter := NewUserRouter(usersRouter, userController, cfg)

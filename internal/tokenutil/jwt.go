@@ -30,8 +30,8 @@ func parseToken(tokenString string, secret string) (*jwt.Token, error) {
 	return token, nil
 }
 
-func CreateAccessToken(user *domain.User, secret string, expiry int) (string, error) {
-	exp := time.Now().Add(time.Hour * time.Duration(expiry))
+func CreateAccessToken(user *domain.User, secret string, expiry time.Duration) (string, error) {
+	exp := time.Now().Add(time.Hour * expiry)
 	claims := &domain.JwtCustomClaims{
 		ID: strconv.FormatUint(uint64(user.ID), 10),
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -41,7 +41,7 @@ func CreateAccessToken(user *domain.User, secret string, expiry int) (string, er
 	return createToken(claims, secret)
 }
 
-func CreateRefreshToken(user *domain.User, secret string, expiry int) (string, error) {
+func CreateRefreshToken(user *domain.User, secret string, expiry time.Duration) (string, error) {
 	exp := time.Now().Add(time.Hour * time.Duration(expiry))
 	claims := &domain.JwtCustomRefreshClaims{
 		ID: strconv.FormatUint(uint64(user.ID), 10),

@@ -18,6 +18,11 @@ func tryToHandleErr(c *gin.Context, err error) (IsHandled bool) {
 		return true
 	}
 
+	if errors.Is(err, domain.ErrInvalidLoginCredentials) {
+		c.JSON(http.StatusForbidden, domain.InvalidAuthCredentialsResponse)
+		return true
+	}
+
 	var limitErr *domain.ErrPaginationLimitExceeded
 	if errors.As(err, &limitErr) {
 		c.JSON(http.StatusBadRequest, domain.NewPaginationErrorResponse(limitErr.Error()))

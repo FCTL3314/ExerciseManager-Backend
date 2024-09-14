@@ -1,9 +1,11 @@
 package usecase
 
 import (
+	"ExerciseManager/bootstrap"
 	"ExerciseManager/internal/accesscontrol"
 	"ExerciseManager/internal/auth"
 	"ExerciseManager/internal/domain"
+	"ExerciseManager/internal/tokenutil"
 	"errors"
 	"gorm.io/gorm"
 )
@@ -12,17 +14,20 @@ type UserUsecase struct {
 	userRepository    domain.UserRepository
 	userAccessChecker accesscontrol.UserChecker
 	passwordHasher    auth.PasswordHasher
+	cfg               *bootstrap.Config
 }
 
 func NewUserUsecase(
 	userRepository domain.UserRepository,
 	userAccessChecker accesscontrol.UserChecker,
 	passwordHasher auth.PasswordHasher,
+	cfg *bootstrap.Config,
 ) *UserUsecase {
 	return &UserUsecase{
 		userRepository:    userRepository,
 		userAccessChecker: userAccessChecker,
 		passwordHasher:    passwordHasher,
+		cfg:               cfg,
 	}
 }
 
@@ -79,6 +84,32 @@ func (uu *UserUsecase) Create(createUser *domain.CreateUser) (*domain.User, erro
 	}
 
 	return &domain.User{}, &domain.ErrObjectUniqueConstraint{Fields: []string{"username"}}
+}
+
+func (uu *UserUsecase) Login(loginUser *domain.LoginUser) (*domain.SuccessLoginResponse, error) {
+	targetUser, err := uu.userRepository.GetByUsername(loginUser.Username)
+	if err != nil {
+		return nil, domain.ErrInvalidLoginCredentials
+	}
+
+	err = uu.passwordHasher.Compare(targetUser.Password, loginUser.Password)
+	if err != nil {
+		return nil, domain.ErrInvalidLoginCredentials
+	}
+
+	accessToken, err := tokenutil.CreateAccessToken(targetUser, uu.cfg.JWTSecret, uu.cfg.JWTAccessExpire)
+	if err != nil {
+		return nil, err
+	}
+	refreshToken, err := tokenutil.CreateRefreshToken(targetUser, uu.cfg.JWTSecret, uu.cfg.JWTRefreshExpire)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.SuccessLoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
 }
 
 func (uu *UserUsecase) Update(authUserId uint, id uint, updateUser *domain.UpdateUser) (*domain.User, error) {

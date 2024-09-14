@@ -2,10 +2,13 @@ package bootstrap
 
 import (
 	"github.com/spf13/viper"
+	"time"
 )
 
 type Security struct {
-	JWTSecret string `mapstructure:"jwt_secret"`
+	JWTSecret        string `mapstructure:"jwt_secret"`
+	JWTAccessExpire  time.Duration
+	JWTRefreshExpire time.Duration
 }
 
 type Server struct {
@@ -33,7 +36,7 @@ func NewConfig() (*Config, error) {
 	if err := cfg.LoadEnv("./.env"); err != nil {
 		return nil, err
 	}
-
+	cfg.loadJWTExpire()
 	return cfg, nil
 }
 
@@ -73,4 +76,10 @@ func (cfg *Config) loadFromFile(Path string, ConfigType string) error {
 
 func (cfg *Config) LoadEnv(Path string) error {
 	return cfg.loadFromFile(Path, "env")
+}
+
+func (cfg *Config) loadJWTExpire() {
+	// TODO: Move to .yml config file.
+	cfg.JWTAccessExpire = time.Hour * 1
+	cfg.JWTRefreshExpire = (time.Hour * 24) * 30
 }

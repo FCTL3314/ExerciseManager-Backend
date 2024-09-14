@@ -29,7 +29,7 @@ func (ub *UserBase) ApplyToUser(user *User) *User {
 	return user
 }
 
-type CreateUser struct {
+type LoginUser struct {
 	UserBase
 	Password string `json:"password" validate:"required,min=6,max=128"`
 }
@@ -40,12 +40,12 @@ func (cu *CreateUser) ToUser() *User {
 	return user
 }
 
-type UpdateUser struct {
-	UserBase
+type CreateUser struct {
+	LoginUser
 }
 
-type LoginUser struct {
-	CreateUser
+type UpdateUser struct {
+	UserBase
 }
 
 type User struct {
@@ -69,4 +69,9 @@ func ToResponseUsers(users []*User) []*ResponseUser {
 		responseUsers[i] = user.ToResponseUser()
 	}
 	return responseUsers
+}
+
+type SuccessLoginResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }

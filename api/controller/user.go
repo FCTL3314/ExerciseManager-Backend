@@ -8,25 +8,25 @@ import (
 	"net/http"
 )
 
-type DefaultUserController struct {
+type UserController struct {
 	usecase   domain.UserUsecase
-	validator validation.UserValidator
+	validator validation.IUserValidator
 	Logger    bootstrap.Logger
 }
 
-func NewDefaultUserController(
+func NewUserController(
 	usecase domain.UserUsecase,
-	validator validation.UserValidator,
+	validator validation.IUserValidator,
 	logger bootstrap.Logger,
-) *DefaultUserController {
-	return &DefaultUserController{
+) *UserController {
+	return &UserController{
 		usecase:   usecase,
 		validator: validator,
 		Logger:    logger,
 	}
 }
 
-func (uc *DefaultUserController) Me(c *gin.Context) {
+func (uc *UserController) Me(c *gin.Context) {
 	authUserId := c.GetUint("x-user-id")
 
 	user, err := uc.usecase.GetById(authUserId)
@@ -43,7 +43,7 @@ func (uc *DefaultUserController) Me(c *gin.Context) {
 	c.JSON(http.StatusOK, responseUser)
 }
 
-func (uc *DefaultUserController) Get(c *gin.Context) {
+func (uc *UserController) Get(c *gin.Context) {
 	Id, IsFound := tryToGetIdParamOrBadRequest(c, "id")
 	if !IsFound {
 		return
@@ -63,7 +63,7 @@ func (uc *DefaultUserController) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, responseUser)
 }
 
-func (uc *DefaultUserController) List(c *gin.Context) {
+func (uc *UserController) List(c *gin.Context) {
 	paginationParams, err := getUserPaginationParams(c)
 	if err != nil {
 		if tryToHandleErr(c, err) {
@@ -95,7 +95,7 @@ func (uc *DefaultUserController) List(c *gin.Context) {
 	c.JSON(http.StatusOK, paginatedResponse)
 }
 
-func (uc *DefaultUserController) Create(c *gin.Context) {
+func (uc *UserController) Create(c *gin.Context) {
 	var user domain.CreateUser
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
@@ -121,7 +121,31 @@ func (uc *DefaultUserController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, responseUser)
 }
 
-func (uc *DefaultUserController) Update(c *gin.Context) {
+func (uc *UserController) Login(c *gin.Context) {
+	var user domain.LoginUser
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
+		return
+	}
+
+	if err := uc.validator.ValidateLoginUser(&user); err != nil {
+		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
+		return
+	}
+
+	loginResponse, err := uc.usecase.Login(&user)
+	if err != nil {
+		if tryToHandleErr(c, err) {
+			return
+		}
+		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		return
+	}
+
+	c.JSON(http.StatusCreated, loginResponse)
+}
+
+func (uc *UserController) Update(c *gin.Context) {
 	Id, IsFound := tryToGetIdParamOrBadRequest(c, "id")
 	if !IsFound {
 		return
@@ -154,7 +178,7 @@ func (uc *DefaultUserController) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, responseUser)
 }
 
-func (uc *DefaultUserController) Delete(c *gin.Context) {
+func (uc *UserController) Delete(c *gin.Context) {
 	Id, IsFound := tryToGetIdParamOrBadRequest(c, "id")
 	if !IsFound {
 		return

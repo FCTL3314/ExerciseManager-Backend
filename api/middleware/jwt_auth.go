@@ -16,7 +16,7 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 		tokenParts := strings.Split(authHeader, " ")
 
 		if len(tokenParts) != 2 {
-			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsErrorResponse)
+			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsResponse)
 			c.Abort()
 			return
 		}
@@ -26,21 +26,21 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 		authorized, _ := tokenutil.IsAuthorized(token, secret)
 
 		if !authorized || schema != "Bearer" {
-			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsErrorResponse)
+			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsResponse)
 			c.Abort()
 			return
 		}
 
 		userIDString, err := tokenutil.ExtractIDFromToken(token, secret)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsErrorResponse)
+			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsResponse)
 			c.Abort()
 			return
 		}
 
 		userID, err := strconv.ParseUint(userIDString, 10, 64)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsErrorResponse)
+			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsResponse)
 		}
 
 		c.Set("x-user-id", uint(userID))

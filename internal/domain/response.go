@@ -46,12 +46,16 @@ var (
 		Detail:   "Forbidden",
 		Codename: "forbidden",
 	}
-	InvalidURLParamErrorResponse = &ErrorResponse{
+	InvalidURLParamResponse = &ErrorResponse{
 		Detail:   "Invalid url param",
 		Codename: "invalid_url_param",
 	}
-	InvalidAuthCredentialsErrorResponse = &ErrorResponse{
+	InvalidAuthCredentialsResponse = &ErrorResponse{
 		Detail:   "Invalid authentication credentials provided",
-		Codename: "invalid_auth_credentials_error",
+		Codename: "invalid_auth_credentials",
+	}
+	InvalidUsernameOrPasswordResponse = &ErrorResponse{
+		Detail:   "Invalid username or password",
+		Codename: "invalid_username_or_password",
 	}
 )

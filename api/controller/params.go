@@ -10,7 +10,7 @@ import (
 func tryToGetIdParamOrBadRequest(c *gin.Context, param string) (Id uint, IsFound bool) {
 	id, err := strconv.ParseUint(c.Param(param), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, domain.InvalidURLParamErrorResponse)
+		c.JSON(http.StatusBadRequest, domain.InvalidURLParamResponse)
 		return 0, false
 	}
 	return uint(id), true

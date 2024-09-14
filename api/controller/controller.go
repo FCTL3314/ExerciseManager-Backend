@@ -10,7 +10,8 @@ type Controller interface {
 	Delete(c *gin.Context)
 }
 
-type UserController interface {
+type IUserController interface {
 	Me(c *gin.Context)
+	Login(c *gin.Context)
 	Controller
 }
