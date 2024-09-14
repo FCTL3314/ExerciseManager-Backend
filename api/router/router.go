@@ -5,6 +5,7 @@ import (
 	"ExerciseManager/api/middleware"
 	"ExerciseManager/bootstrap"
 	"ExerciseManager/internal/accesscontrol"
+	"ExerciseManager/internal/auth"
 	"ExerciseManager/internal/repository"
 	"ExerciseManager/internal/usecase"
 	"github.com/gin-gonic/gin"
@@ -22,7 +23,11 @@ func registerUserRoutes(baseRouter *gin.RouterGroup, db *gorm.DB, cfg *bootstrap
 	usersRouter.Use(middleware.JwtAuthMiddleware(cfg.JWTSecret))
 
 	userRepository := repository.NewUserRepository(db)
-	userUsecase := usecase.NewUserUsecase(userRepository, &accesscontrol.User{})
+	userUsecase := usecase.NewUserUsecase(
+		userRepository,
+		&accesscontrol.User{},
+		&auth.BcryptPasswordHasher{},
+	)
 	userController := controller.NewUserController(userUsecase)
 	userRouter := NewUserRouter(usersRouter, userController)
 

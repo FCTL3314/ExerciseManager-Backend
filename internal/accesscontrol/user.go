@@ -1,17 +1,15 @@
 package accesscontrol
 
-import "ExerciseManager/internal/domain"
-
 type UserChecker interface {
-	CanAccessUser(authenticatedUserID, targetUserID uint) error
+	CanAccessUser(authenticatedUserID, targetUserID uint) bool
 }
 
 type User struct {
 }
 
-func (ac *User) CanAccessUser(authenticatedUserID, targetUserID uint) error {
+func (ac *User) CanAccessUser(authenticatedUserID, targetUserID uint) bool {
 	if authenticatedUserID != targetUserID {
-		return domain.ErrAccessDenied
+		return false
 	}
-	return nil
+	return true
 }

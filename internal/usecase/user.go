@@ -2,19 +2,28 @@ package usecase
 
 import (
 	"ExerciseManager/internal/accesscontrol"
+	"ExerciseManager/internal/auth"
 	"ExerciseManager/internal/domain"
 	"errors"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type UserUsecase struct {
 	userRepository    domain.UserRepository
 	userAccessChecker accesscontrol.UserChecker
+	passwordHasher    auth.PasswordHasher
 }
 
-func NewUserUsecase(userRepository domain.UserRepository, userAccessChecker accesscontrol.UserChecker) *UserUsecase {
-	return &UserUsecase{userRepository: userRepository, userAccessChecker: userAccessChecker}
+func NewUserUsecase(
+	userRepository domain.UserRepository,
+	userAccessChecker accesscontrol.UserChecker,
+	passwordHasher auth.PasswordHasher,
+) *UserUsecase {
+	return &UserUsecase{
+		userRepository:    userRepository,
+		userAccessChecker: userAccessChecker,
+		passwordHasher:    passwordHasher,
+	}
 }
 
 func (uu *UserUsecase) Get(params *domain.FilterParams) (*domain.User, error) {
@@ -43,11 +52,11 @@ func (uu *UserUsecase) List(params *domain.Params) (*domain.PaginatedResult[*dom
 }
 
 func (uu *UserUsecase) Create(createUser *domain.CreateUser) (*domain.User, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(createUser.Password), 10)
+	hashedPassword, err := uu.passwordHasher.Hash(createUser.Password)
 	if err != nil {
 		return &domain.User{}, err
 	}
-	createUser.Password = string(hashedPassword)
+	createUser.Password = hashedPassword
 
 	if _, err := uu.userRepository.GetByUsername(createUser.Username); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -60,7 +69,7 @@ func (uu *UserUsecase) Create(createUser *domain.CreateUser) (*domain.User, erro
 }
 
 func (uu *UserUsecase) Update(authUserId uint, id uint, updateUser *domain.UpdateUser) (*domain.User, error) {
-	if err := uu.userAccessChecker.CanAccessUser(authUserId, id); err != nil {
+	if !uu.userAccessChecker.CanAccessUser(authUserId, id) {
 		return nil, domain.ErrAccessDenied
 	}
 
@@ -78,7 +87,7 @@ func (uu *UserUsecase) Update(authUserId uint, id uint, updateUser *domain.Updat
 }
 
 func (uu *UserUsecase) Delete(authUserId uint, id uint) error {
-	if err := uu.userAccessChecker.CanAccessUser(authUserId, id); err != nil {
+	if !uu.userAccessChecker.CanAccessUser(authUserId, id) {
 		return domain.ErrAccessDenied
 	}
 
