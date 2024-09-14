@@ -2,6 +2,7 @@ package router
 
 import (
 	"ExerciseManager/api/controller"
+	"ExerciseManager/api/middleware"
 	"ExerciseManager/bootstrap"
 	"ExerciseManager/internal/accesscontrol"
 	"ExerciseManager/internal/auth"
@@ -19,17 +20,17 @@ func RegisterRoutes(
 	loggerGroup *bootstrap.LoggerGroup,
 ) {
 	v1Router := gin.Group("/api/v1/")
-
-	registerUserRoutes(v1Router, db, cfg, loggerGroup.User)
+	registerUserRoutes(v1Router, db, cfg, *loggerGroup.User)
 }
 
 func registerUserRoutes(
 	baseRouter *gin.RouterGroup,
 	db *gorm.DB,
 	cfg *bootstrap.Config,
-	logger *bootstrap.Logger,
+	logger bootstrap.Logger,
 ) {
 	usersRouter := baseRouter.Group("/users/")
+	usersRouter.Use(middleware.ErrorLoggerMiddleware(logger))
 
 	userRepository := repository.NewUserRepository(db)
 	userUsecase := usecase.NewUserUsecase(
@@ -37,11 +38,10 @@ func registerUserRoutes(
 		accesscontrol.NewUserAccess(),
 		auth.NewBcryptPasswordHasher(),
 	)
-
 	userController := controller.NewDefaultUserController(
 		userUsecase,
 		validation.NewDefaultUserValidator(),
-		*logger,
+		logger,
 	)
 	userRouter := NewUserRouter(usersRouter, userController, cfg)
 

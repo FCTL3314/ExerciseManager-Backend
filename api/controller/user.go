@@ -32,7 +32,7 @@ func (uc *DefaultUserController) Me(c *gin.Context) {
 	user, err := uc.usecase.GetById(authUserId)
 
 	if err != nil {
-		if tryToHandleErrOrLog(c, err, uc.Logger) {
+		if tryToHandleErr(c, err) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
@@ -52,7 +52,7 @@ func (uc *DefaultUserController) Get(c *gin.Context) {
 	user, err := uc.usecase.GetById(Id)
 
 	if err != nil {
-		if tryToHandleErrOrLog(c, err, uc.Logger) {
+		if tryToHandleErr(c, err) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
@@ -66,7 +66,7 @@ func (uc *DefaultUserController) Get(c *gin.Context) {
 func (uc *DefaultUserController) List(c *gin.Context) {
 	paginationParams, err := getUserPaginationParams(c)
 	if err != nil {
-		if tryToHandleErrOrLog(c, err, uc.Logger) {
+		if tryToHandleErr(c, err) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
@@ -109,7 +109,7 @@ func (uc *DefaultUserController) Create(c *gin.Context) {
 
 	createdUser, err := uc.usecase.Create(&user)
 	if err != nil {
-		if tryToHandleErrOrLog(c, err, uc.Logger) {
+		if tryToHandleErr(c, err) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
@@ -142,7 +142,7 @@ func (uc *DefaultUserController) Update(c *gin.Context) {
 
 	updatedUser, err := uc.usecase.Update(authUserId, Id, &user)
 	if err != nil {
-		if tryToHandleErrOrLog(c, err, uc.Logger) {
+		if tryToHandleErr(c, err) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
@@ -163,7 +163,7 @@ func (uc *DefaultUserController) Delete(c *gin.Context) {
 	authUserId := c.GetUint("x-user-id")
 
 	if err := uc.usecase.Delete(authUserId, Id); err != nil {
-		if tryToHandleErrOrLog(c, err, uc.Logger) {
+		if tryToHandleErr(c, err) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
