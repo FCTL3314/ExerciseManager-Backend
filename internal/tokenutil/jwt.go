@@ -13,8 +13,8 @@ type IJWTTokenManager interface {
 	CreateUserRefreshToken(user *domain.User) (string, error)
 	IsAccessTokenValid(tokenStr string) (bool, error)
 	IsRefreshTokenValid(tokenStr string) (bool, error)
-	ExtractUserIDFromAccessToken(tokenStr string) (uint, error)
-	ExtractUserIDFromRefreshToken(tokenStr string) (uint, error)
+	ExtractUserIDFromAccessToken(tokenStr string) (int64, error)
+	ExtractUserIDFromRefreshToken(tokenStr string) (int64, error)
 }
 
 type JWTTokenManager struct {
@@ -58,26 +58,26 @@ func (tm *JWTTokenManager) isTokenValid(tokenStr string, secret string) (bool, e
 	return token.Valid, nil
 }
 
-func (tm *JWTTokenManager) ExtractUserIDFromAccessToken(tokenStr string) (uint, error) {
+func (tm *JWTTokenManager) ExtractUserIDFromAccessToken(tokenStr string) (int64, error) {
 	return tm.ExtractUserIDFromToken(tokenStr, tm.AccessSecret)
 }
 
-func (tm *JWTTokenManager) ExtractUserIDFromRefreshToken(tokenStr string) (uint, error) {
+func (tm *JWTTokenManager) ExtractUserIDFromRefreshToken(tokenStr string) (int64, error) {
 	return tm.ExtractUserIDFromToken(tokenStr, tm.RefreshSecret)
 }
 
-func (tm *JWTTokenManager) ExtractUserIDFromToken(tokenStr string, secret string) (uint, error) {
+func (tm *JWTTokenManager) ExtractUserIDFromToken(tokenStr string, secret string) (int64, error) {
 	idString, err := tm.extractIdFromToken(tokenStr, secret)
 	if err != nil {
 		return 0, err
 	}
 
-	id, err := strconv.ParseUint(idString, 10, 64)
+	id, err := strconv.ParseInt(idString, 10, 64)
 	if err != nil {
 		return 0, domain.ErrInvalidAuthCredentials
 	}
 
-	return uint(id), nil
+	return id, nil
 }
 
 func (tm *JWTTokenManager) extractIdFromToken(tokenStr string, secret string) (string, error) {

@@ -26,7 +26,7 @@ func NewUserController(
 }
 
 func (uc *UserController) Me(c *gin.Context) {
-	authUserId := c.GetUint(string(UserIDContextKey))
+	authUserId := c.GetInt64(string(UserIDContextKey))
 
 	user, err := uc.usecase.GetById(authUserId)
 
@@ -46,7 +46,7 @@ func (uc *UserController) Get(c *gin.Context) {
 		return
 	}
 
-	user, err := uc.usecase.GetById(uint(id))
+	user, err := uc.usecase.GetById(id)
 
 	if err != nil {
 		uc.errorHandler.Handle(c, err)
@@ -143,7 +143,7 @@ func (uc *UserController) Update(c *gin.Context) {
 		return
 	}
 
-	authUserId := c.GetUint(string(UserIDContextKey))
+	authUserId := c.GetInt64(string(UserIDContextKey))
 
 	var user domain.UpdateUserRequest
 	if err := c.ShouldBindJSON(&user); err != nil {
@@ -151,7 +151,7 @@ func (uc *UserController) Update(c *gin.Context) {
 		return
 	}
 
-	updatedUser, err := uc.usecase.Update(authUserId, uint(id), &user)
+	updatedUser, err := uc.usecase.Update(authUserId, id, &user)
 	if err != nil {
 		uc.errorHandler.Handle(c, err)
 		return
@@ -169,9 +169,9 @@ func (uc *UserController) Delete(c *gin.Context) {
 		return
 	}
 
-	authUserId := c.GetUint(string(UserIDContextKey))
+	authUserId := c.GetInt64(string(UserIDContextKey))
 
-	if err := uc.usecase.Delete(authUserId, uint(id)); err != nil {
+	if err := uc.usecase.Delete(authUserId, id); err != nil {
 		uc.errorHandler.Handle(c, err)
 		return
 	}

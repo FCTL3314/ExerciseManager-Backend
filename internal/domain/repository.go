@@ -1,7 +1,7 @@
 package domain
 
 type GetterById[T any] interface {
-	GetById(id uint) (*T, error)
+	GetById(id int64) (*T, error)
 }
 
 type Getter[T any] interface {
@@ -21,7 +21,7 @@ type Updater[T any] interface {
 }
 
 type Deleter[T any] interface {
-	Delete(id uint) error
+	Delete(id int64) error
 }
 
 type Counter[T any] interface {

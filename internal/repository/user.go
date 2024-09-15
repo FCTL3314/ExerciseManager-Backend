@@ -13,7 +13,7 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (ur *UserRepository) GetById(id uint) (*domain.User, error) {
+func (ur *UserRepository) GetById(id int64) (*domain.User, error) {
 	return ur.Get(&domain.FilterParams{
 		Query: "id = ?",
 		Args:  []interface{}{id},
@@ -66,7 +66,7 @@ func (ur *UserRepository) Update(user *domain.User) (*domain.User, error) {
 	return user, nil
 }
 
-func (ur *UserRepository) Delete(id uint) error {
+func (ur *UserRepository) Delete(id int64) error {
 	if query := ur.db.Where("id = ?", id).Delete(&domain.User{}); query.Error != nil {
 		return query.Error
 	}

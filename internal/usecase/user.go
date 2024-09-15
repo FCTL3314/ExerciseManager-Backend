@@ -32,7 +32,7 @@ func NewUserUsecase(
 	}
 }
 
-func (uu *UserUsecase) GetById(id uint) (*domain.User, error) {
+func (uu *UserUsecase) GetById(id int64) (*domain.User, error) {
 	user, err := uu.userRepository.GetById(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -140,7 +140,7 @@ func (uu *UserUsecase) RefreshTokens(refreshTokenRequest *domain.RefreshTokenReq
 	}, nil
 }
 
-func (uu *UserUsecase) Update(authUserId uint, id uint, updateUserRequest *domain.UpdateUserRequest) (*domain.User, error) {
+func (uu *UserUsecase) Update(authUserId int64, id int64, updateUserRequest *domain.UpdateUserRequest) (*domain.User, error) {
 	if !uu.userAccessChecker.CanAccessUser(authUserId, id) {
 		return nil, domain.ErrAccessDenied
 	}
@@ -158,7 +158,7 @@ func (uu *UserUsecase) Update(authUserId uint, id uint, updateUserRequest *domai
 	return uu.userRepository.Update(userToUpdate)
 }
 
-func (uu *UserUsecase) Delete(authUserId uint, id uint) error {
+func (uu *UserUsecase) Delete(authUserId int64, id int64) error {
 	if !uu.userAccessChecker.CanAccessUser(authUserId, id) {
 		return domain.ErrAccessDenied
 	}
