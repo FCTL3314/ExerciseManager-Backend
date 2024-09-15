@@ -3,7 +3,7 @@ package domain
 import "time"
 
 type User struct {
-	ID        uint
+	ID        int64
 	Username  string
 	Password  string
 	CreatedAt time.Time
@@ -24,7 +24,7 @@ type LoginUserRequest struct {
 }
 
 type ResponseUser struct {
-	ID        uint      `json:"id"`
+	ID        int64     `json:"id"`
 	Username  string    `json:"username"`
 	CreatedAt time.Time `json:"created_at"`
 }
