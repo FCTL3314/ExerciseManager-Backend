@@ -13,5 +13,6 @@ type Controller interface {
 type IUserController interface {
 	Me(c *gin.Context)
 	Login(c *gin.Context)
+	RefreshTokens(c *gin.Context)
 	Controller
 }

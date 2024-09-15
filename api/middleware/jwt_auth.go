@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func JwtAuthMiddleware(secret string) gin.HandlerFunc {
+func JwtAuthMiddleware(tokenManager *tokenutil.TokenManager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
 		tokenParts := strings.Split(authHeader, " ")
@@ -23,7 +23,7 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 
 		token := tokenParts[1]
 		schema := tokenParts[0]
-		authorized, _ := tokenutil.IsAuthorized(token, secret)
+		authorized, _ := tokenManager.IsAccessTokenValid(token)
 
 		if !authorized || schema != "Bearer" {
 			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsResponse)
@@ -31,7 +31,7 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 			return
 		}
 
-		userIDString, err := tokenutil.ExtractIDFromToken(token, secret)
+		userIDString, err := tokenManager.ExtractUserIDFromAccessToken(token)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsResponse)
 			c.Abort()

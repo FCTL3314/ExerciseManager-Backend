@@ -6,9 +6,10 @@ import (
 )
 
 type IUserValidator interface {
-	ValidateCreateUser(createUser *domain.CreateUser) error
-	ValidateLoginUser(createUser *domain.LoginUser) error
-	ValidateUpdateUser(updateUser *domain.UpdateUser) error
+	ValidateCreateUserRequest(createUserRequest *domain.CreateUserRequest) error
+	ValidateLoginUserRequest(loginUserRequest *domain.LoginUserRequest) error
+	ValidateRefreshTokenRequest(refreshTokenRequest *domain.RefreshTokenRequest) error
+	ValidateUpdateUserRequest(updateUserRequest *domain.UpdateUserRequest) error
 }
 
 type UserValidator struct {
@@ -21,14 +22,18 @@ func NewUserValidator() *UserValidator {
 	}
 }
 
-func (uv *UserValidator) ValidateCreateUser(createUser *domain.CreateUser) error {
-	return uv.validate.Struct(createUser)
+func (uv *UserValidator) ValidateCreateUserRequest(createUserRequest *domain.CreateUserRequest) error {
+	return uv.validate.Struct(createUserRequest)
 }
 
-func (uv *UserValidator) ValidateLoginUser(createUser *domain.LoginUser) error {
-	return uv.validate.Struct(createUser)
+func (uv *UserValidator) ValidateLoginUserRequest(loginUserRequest *domain.LoginUserRequest) error {
+	return uv.validate.Struct(loginUserRequest)
 }
 
-func (uv *UserValidator) ValidateUpdateUser(updateUser *domain.UpdateUser) error {
-	return uv.validate.Struct(updateUser)
+func (uv *UserValidator) ValidateRefreshTokenRequest(refreshTokenRequest *domain.RefreshTokenRequest) error {
+	return uv.validate.Struct(refreshTokenRequest)
+}
+
+func (uv *UserValidator) ValidateUpdateUserRequest(updateUserRequest *domain.UpdateUserRequest) error {
+	return uv.validate.Struct(updateUserRequest)
 }

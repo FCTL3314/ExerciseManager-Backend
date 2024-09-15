@@ -7,6 +7,7 @@ import (
 	"ExerciseManager/internal/accesscontrol"
 	"ExerciseManager/internal/auth"
 	"ExerciseManager/internal/repository"
+	"ExerciseManager/internal/tokenutil"
 	"ExerciseManager/internal/usecase"
 	"ExerciseManager/internal/validation"
 	"github.com/gin-gonic/gin"
@@ -65,11 +66,16 @@ func registerUserRoutes(
 	usersRouter := baseRouter.Group("/users/")
 	usersRouter.Use(middleware.ErrorLoggerMiddleware(logger))
 
+	tokenManager := tokenutil.NewTokenManager(
+		cfg.JWTAccessSecret, cfg.JWTRefreshSecret, cfg.JWTAccessExpire, cfg.JWTRefreshExpire,
+	)
+
 	userRepository := repository.NewUserRepository(db)
 	userUsecase := usecase.NewUserUsecase(
 		userRepository,
 		accesscontrol.NewUserAccess(),
 		auth.NewBcryptPasswordHasher(),
+		tokenManager,
 		cfg,
 	)
 	userController := controller.NewUserController(
@@ -77,7 +83,7 @@ func registerUserRoutes(
 		validation.NewUserValidator(),
 		logger,
 	)
-	userRouter := NewUserRouter(usersRouter, userController, cfg)
+	userRouter := NewUserRouter(usersRouter, tokenManager, userController, cfg)
 
 	userRouter.RegisterAll()
 }

@@ -96,13 +96,13 @@ func (uc *UserController) List(c *gin.Context) {
 }
 
 func (uc *UserController) Create(c *gin.Context) {
-	var user domain.CreateUser
+	var user domain.CreateUserRequest
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
 		return
 	}
 
-	if err := uc.validator.ValidateCreateUser(&user); err != nil {
+	if err := uc.validator.ValidateCreateUserRequest(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
 		return
 	}
@@ -122,13 +122,13 @@ func (uc *UserController) Create(c *gin.Context) {
 }
 
 func (uc *UserController) Login(c *gin.Context) {
-	var user domain.LoginUser
+	var user domain.LoginUserRequest
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
 		return
 	}
 
-	if err := uc.validator.ValidateLoginUser(&user); err != nil {
+	if err := uc.validator.ValidateLoginUserRequest(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
 		return
 	}
@@ -145,6 +145,30 @@ func (uc *UserController) Login(c *gin.Context) {
 	c.JSON(http.StatusCreated, loginResponse)
 }
 
+func (uc *UserController) RefreshTokens(c *gin.Context) {
+	var refreshTokenRequest domain.RefreshTokenRequest
+	if err := c.ShouldBindJSON(&refreshTokenRequest); err != nil {
+		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
+		return
+	}
+
+	if err := uc.validator.ValidateRefreshTokenRequest(&refreshTokenRequest); err != nil {
+		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
+		return
+	}
+
+	refreshTokenResponse, err := uc.usecase.RefreshTokens(&refreshTokenRequest)
+	if err != nil {
+		if tryToHandleErr(c, err) {
+			return
+		}
+		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		return
+	}
+
+	c.JSON(http.StatusCreated, refreshTokenResponse)
+}
+
 func (uc *UserController) Update(c *gin.Context) {
 	Id, IsFound := tryToGetIdParamOrBadRequest(c, "id")
 	if !IsFound {
@@ -153,13 +177,13 @@ func (uc *UserController) Update(c *gin.Context) {
 
 	authUserId := c.GetUint("x-user-id")
 
-	var user domain.UpdateUser
+	var user domain.UpdateUserRequest
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
 		return
 	}
 
-	if err := uc.validator.ValidateUpdateUser(&user); err != nil {
+	if err := uc.validator.ValidateUpdateUserRequest(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
 		return
 	}

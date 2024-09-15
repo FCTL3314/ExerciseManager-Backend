@@ -54,8 +54,4 @@ var (
 		Detail:   "Invalid authentication credentials provided",
 		Codename: "invalid_auth_credentials",
 	}
-	InvalidUsernameOrPasswordResponse = &ErrorResponse{
-		Detail:   "Invalid username or password",
-		Codename: "invalid_username_or_password",
-	}
 )

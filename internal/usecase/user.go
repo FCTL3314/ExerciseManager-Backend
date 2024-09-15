@@ -8,12 +8,14 @@ import (
 	"ExerciseManager/internal/tokenutil"
 	"errors"
 	"gorm.io/gorm"
+	"strconv"
 )
 
 type UserUsecase struct {
 	userRepository    domain.UserRepository
 	userAccessChecker accesscontrol.UserChecker
 	passwordHasher    auth.PasswordHasher
+	tokenManager      *tokenutil.TokenManager
 	cfg               *bootstrap.Config
 }
 
@@ -21,12 +23,14 @@ func NewUserUsecase(
 	userRepository domain.UserRepository,
 	userAccessChecker accesscontrol.UserChecker,
 	passwordHasher auth.PasswordHasher,
+	tokenManager *tokenutil.TokenManager,
 	cfg *bootstrap.Config,
 ) *UserUsecase {
 	return &UserUsecase{
 		userRepository:    userRepository,
 		userAccessChecker: userAccessChecker,
 		passwordHasher:    passwordHasher,
+		tokenManager:      tokenManager,
 		cfg:               cfg,
 	}
 }
@@ -68,7 +72,7 @@ func (uu *UserUsecase) List(params *domain.Params) (*domain.PaginatedResult[*dom
 	return &domain.PaginatedResult[*domain.User]{Results: users, Count: count}, nil
 }
 
-func (uu *UserUsecase) Create(createUser *domain.CreateUser) (*domain.User, error) {
+func (uu *UserUsecase) Create(createUser *domain.CreateUserRequest) (*domain.User, error) {
 	hashedPassword, err := uu.passwordHasher.Hash(createUser.Password)
 	if err != nil {
 		return &domain.User{}, err
@@ -86,33 +90,64 @@ func (uu *UserUsecase) Create(createUser *domain.CreateUser) (*domain.User, erro
 	return &domain.User{}, &domain.ErrObjectUniqueConstraint{Fields: []string{"username"}}
 }
 
-func (uu *UserUsecase) Login(loginUser *domain.LoginUser) (*domain.SuccessLoginResponse, error) {
+func (uu *UserUsecase) Login(loginUser *domain.LoginUserRequest) (*domain.TokensResponse, error) {
 	targetUser, err := uu.userRepository.GetByUsername(loginUser.Username)
 	if err != nil {
-		return nil, domain.ErrInvalidLoginCredentials
+		return nil, domain.ErrInvalidAuthCredentials
 	}
 
 	err = uu.passwordHasher.Compare(targetUser.Password, loginUser.Password)
 	if err != nil {
-		return nil, domain.ErrInvalidLoginCredentials
+		return nil, domain.ErrInvalidAuthCredentials
 	}
 
-	accessToken, err := tokenutil.CreateAccessToken(targetUser, uu.cfg.JWTSecret, uu.cfg.JWTAccessExpire)
+	accessToken, err := uu.tokenManager.CreateAccessToken(targetUser)
 	if err != nil {
 		return nil, err
 	}
-	refreshToken, err := tokenutil.CreateRefreshToken(targetUser, uu.cfg.JWTSecret, uu.cfg.JWTRefreshExpire)
+	refreshToken, err := uu.tokenManager.CreateRefreshToken(targetUser)
 	if err != nil {
 		return nil, err
 	}
 
-	return &domain.SuccessLoginResponse{
+	return &domain.TokensResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
 }
 
-func (uu *UserUsecase) Update(authUserId uint, id uint, updateUser *domain.UpdateUser) (*domain.User, error) {
+func (uu *UserUsecase) RefreshTokens(refreshTokenRequest *domain.RefreshTokenRequest) (*domain.TokensResponse, error) {
+	userIDString, err := uu.tokenManager.ExtractUserIDFromRefreshToken(refreshTokenRequest.RefreshToken)
+	if err != nil {
+		return nil, domain.ErrInvalidAuthCredentials
+	}
+
+	userID, err := strconv.ParseUint(userIDString, 10, 64)
+	if err != nil {
+		return nil, domain.ErrInvalidAuthCredentials
+	}
+
+	targetUser, err := uu.userRepository.GetById(uint(userID))
+	if err != nil {
+		return nil, domain.ErrInvalidAuthCredentials
+	}
+
+	accessToken, err := uu.tokenManager.CreateAccessToken(targetUser)
+	if err != nil {
+		return nil, err
+	}
+	refreshToken, err := uu.tokenManager.CreateRefreshToken(targetUser)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.TokensResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+func (uu *UserUsecase) Update(authUserId uint, id uint, updateUser *domain.UpdateUserRequest) (*domain.User, error) {
 	if !uu.userAccessChecker.CanAccessUser(authUserId, id) {
 		return nil, domain.ErrAccessDenied
 	}

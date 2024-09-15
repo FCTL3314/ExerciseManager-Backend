@@ -29,22 +29,17 @@ func (ub *UserBase) ApplyToUser(user *User) *User {
 	return user
 }
 
-type LoginUser struct {
-	UserBase
-	Password string `json:"password" validate:"required,min=6,max=128"`
-}
-
-func (cu *CreateUser) ToUser() *User {
+func (cu *CreateUserRequest) ToUser() *User {
 	user := cu.UserBase.ToUser()
 	user.Password = cu.Password
 	return user
 }
 
-type CreateUser struct {
-	LoginUser
+type CreateUserRequest struct {
+	LoginUserRequest
 }
 
-type UpdateUser struct {
+type UpdateUserRequest struct {
 	UserBase
 }
 
@@ -71,7 +66,16 @@ func ToResponseUsers(users []*User) []*ResponseUser {
 	return responseUsers
 }
 
-type SuccessLoginResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+type LoginUserRequest struct {
+	UserBase
+	Password string `json:"password" validate:"required,min=6,max=128"`
+}
+
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token" validate:"required"`
+}
+
+type TokensResponse struct {
+	AccessToken  string `json:"access_token" validate:"required"`
+	RefreshToken string `json:"refresh_token" validate:"required"`
 }

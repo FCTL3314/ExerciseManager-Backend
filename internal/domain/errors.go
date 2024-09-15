@@ -7,9 +7,9 @@ import (
 )
 
 var (
-	ErrObjectNotFound          = errors.New("object not found")
-	ErrAccessDenied            = errors.New("access denied")
-	ErrInvalidLoginCredentials = errors.New("invalid login credentials")
+	ErrObjectNotFound         = errors.New("object not found")
+	ErrAccessDenied           = errors.New("access denied")
+	ErrInvalidAuthCredentials = errors.New("invalid auth credentials")
 )
 
 type ErrPaginationLimitExceeded struct {

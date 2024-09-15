@@ -18,8 +18,8 @@ func tryToHandleErr(c *gin.Context, err error) (IsHandled bool) {
 		return true
 	}
 
-	if errors.Is(err, domain.ErrInvalidLoginCredentials) {
-		c.JSON(http.StatusForbidden, domain.InvalidAuthCredentialsResponse)
+	if errors.Is(err, domain.ErrInvalidAuthCredentials) {
+		c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsResponse)
 		return true
 	}
 

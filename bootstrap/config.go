@@ -6,7 +6,8 @@ import (
 )
 
 type Security struct {
-	JWTSecret        string `mapstructure:"jwt_secret"`
+	JWTAccessSecret  string `mapstructure:"jwt_access_secret"`
+	JWTRefreshSecret string `mapstructure:"jwt_refresh_secret"`
 	JWTAccessExpire  time.Duration
 	JWTRefreshExpire time.Duration
 }
@@ -81,5 +82,5 @@ func (cfg *Config) LoadEnv(Path string) error {
 func (cfg *Config) loadJWTExpire() {
 	// TODO: Move to .yml config file.
 	cfg.JWTAccessExpire = time.Hour * 1
-	cfg.JWTRefreshExpire = (time.Hour * 24) * 30
+	cfg.JWTRefreshExpire = (time.Hour * 24) * 7
 }
