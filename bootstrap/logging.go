@@ -7,6 +7,10 @@ import (
 	"runtime/debug"
 )
 
+const (
+	ControllersLoggerFilePath = "logs/controller.json"
+)
+
 type Logger interface {
 	Debug(msg string, args ...any)
 	Info(msg string, args ...any)
@@ -63,4 +67,4 @@ func initLogger(logFilePath string) Logger {
 	}
 }
 
-func InitUserLogger() Logger { return initLogger("logs/controller.json") }
+func InitUserLogger() Logger { return initLogger(ControllersLoggerFilePath) }

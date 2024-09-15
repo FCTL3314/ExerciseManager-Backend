@@ -1,7 +1,7 @@
 package domain
 
 type PaginatedResponse struct {
-	Count   int         `json:"count"`
+	Count   int64       `json:"count"`
 	Limit   int         `json:"limit"`
 	Offset  int         `json:"offset"`
 	Results interface{} `json:"results"`
@@ -12,46 +12,50 @@ type ErrorResponse struct {
 	Codename string `json:"codename"`
 }
 
+func NewErrorResponse(detail string, codename string) *ErrorResponse {
+	return &ErrorResponse{detail, codename}
+}
+
 func NewPaginationErrorResponse(detail string) *ErrorResponse {
-	return &ErrorResponse{
-		Detail:   detail,
-		Codename: "pagination_error",
-	}
+	return NewErrorResponse(
+		detail,
+		"pagination_error",
+	)
 }
 
 func NewValidationErrorResponse(detail string) *ErrorResponse {
-	return &ErrorResponse{
-		Detail:   detail,
-		Codename: "validation_error",
-	}
+	return NewErrorResponse(
+		detail,
+		"validation_error",
+	)
 }
 
 func NewUniqueConstraintErrorResponse(detail string) *ErrorResponse {
-	return &ErrorResponse{
-		Detail:   detail,
-		Codename: "unique_constraint_error",
-	}
+	return NewErrorResponse(
+		detail,
+		"unique_constraint_error",
+	)
 }
 
 var (
-	InternalServerErrorResponse = ErrorResponse{
-		Detail:   "Internal Server Error",
-		Codename: "internal_server_error",
-	}
-	NotFoundResponse = &ErrorResponse{
-		Detail:   "Not found",
-		Codename: "not_found",
-	}
-	ForbiddenResponse = &ErrorResponse{
-		Detail:   "Forbidden",
-		Codename: "forbidden",
-	}
-	InvalidURLParamResponse = &ErrorResponse{
-		Detail:   "Invalid url param",
-		Codename: "invalid_url_param",
-	}
-	InvalidAuthCredentialsResponse = &ErrorResponse{
-		Detail:   "Invalid authentication credentials provided",
-		Codename: "invalid_auth_credentials",
-	}
+	InternalServerErrorResponse = NewErrorResponse(
+		"Internal Server Error",
+		"internal_server_error",
+	)
+	NotFoundResponse = NewErrorResponse(
+		"Not found",
+		"not_found",
+	)
+	ForbiddenResponse = NewErrorResponse(
+		"Forbidden",
+		"forbidden",
+	)
+	InvalidURLParamResponse = NewErrorResponse(
+		"Invalid url param",
+		"invalid_url_param",
+	)
+	InvalidAuthCredentialsResponse = NewErrorResponse(
+		"Invalid authentication credentials provided",
+		"invalid_auth_credentials",
+	)
 )

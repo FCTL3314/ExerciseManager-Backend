@@ -141,7 +141,7 @@ func (uu *UserUsecase) RefreshTokens(refreshTokenRequest *domain.RefreshTokenReq
 }
 
 func (uu *UserUsecase) Update(authUserId int64, id int64, updateUserRequest *domain.UpdateUserRequest) (*domain.User, error) {
-	if !uu.userAccessChecker.CanAccessUser(authUserId, id) {
+	if !uu.userAccessChecker.HasAccessToUser(authUserId, id) {
 		return nil, domain.ErrAccessDenied
 	}
 
@@ -159,7 +159,7 @@ func (uu *UserUsecase) Update(authUserId int64, id int64, updateUserRequest *dom
 }
 
 func (uu *UserUsecase) Delete(authUserId int64, id int64) error {
-	if !uu.userAccessChecker.CanAccessUser(authUserId, id) {
+	if !uu.userAccessChecker.HasAccessToUser(authUserId, id) {
 		return domain.ErrAccessDenied
 	}
 

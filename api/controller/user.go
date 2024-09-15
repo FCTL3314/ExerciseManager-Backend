@@ -77,7 +77,7 @@ func (uc *UserController) List(c *gin.Context) {
 	responseUsers := domain.ToResponseUsers(paginatedResult.Results)
 
 	paginatedResponse := domain.PaginatedResponse{
-		Count:   int(paginatedResult.Count),
+		Count:   paginatedResult.Count,
 		Limit:   paginationParams.Limit,
 		Offset:  paginationParams.Offset,
 		Results: responseUsers,

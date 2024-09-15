@@ -15,7 +15,7 @@ const (
 func getParamAsInt64(c *gin.Context, key string) (int64, error) {
 	id, err := strconv.ParseInt(c.Param(key), 10, 64)
 	if err != nil {
-		return 0, domain.ErrInvalidParam
+		return 0, domain.ErrInvalidURLParam
 	}
 	return id, nil
 }
