@@ -3,7 +3,6 @@ package controller
 import (
 	"ExerciseManager/internal/domain"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"strconv"
 )
 
@@ -13,13 +12,12 @@ const (
 	UserIDContextKey ContextKey = "userID"
 )
 
-func tryToGetIdParamOrBadRequest(c *gin.Context, param string) (Id uint, IsFound bool) {
-	id, err := strconv.ParseUint(c.Param(param), 10, 64)
+func getParamAsInt64(c *gin.Context, key string) (int64, error) {
+	id, err := strconv.ParseInt(c.Param(key), 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, domain.InvalidURLParamResponse)
-		return 0, false
+		return 0, domain.ErrInvalidParam
 	}
-	return uint(id), true
+	return id, nil
 }
 
 func getPaginationParams(c *gin.Context, maxLimit int) (domain.PaginationParams, error) {

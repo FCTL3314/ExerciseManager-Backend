@@ -10,6 +10,7 @@ var (
 	ErrObjectNotFound         = errors.New("object not found")
 	ErrAccessDenied           = errors.New("access denied")
 	ErrInvalidAuthCredentials = errors.New("invalid auth credentials")
+	ErrInvalidParam           = errors.New("invalid param")
 )
 
 type ErrPaginationLimitExceeded struct {

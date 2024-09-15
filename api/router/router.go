@@ -76,8 +76,10 @@ func registerUserRoutes(
 		auth.NewBcryptPasswordHasher(),
 		tokenManager,
 	)
+	errorHandler := controller.UserErrorHandler()
 	userController := controller.NewUserController(
 		userUsecase,
+		errorHandler,
 		logger,
 	)
 	userRouter := NewUserRouter(usersRouter, tokenManager, userController, cfg)

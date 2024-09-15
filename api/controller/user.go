@@ -8,17 +8,20 @@ import (
 )
 
 type UserController struct {
-	usecase domain.UserUsecase
-	Logger  bootstrap.Logger
+	usecase      domain.UserUsecase
+	errorHandler *ErrorHandler
+	Logger       bootstrap.Logger
 }
 
 func NewUserController(
 	usecase domain.UserUsecase,
+	errorHandler *ErrorHandler,
 	logger bootstrap.Logger,
 ) *UserController {
 	return &UserController{
-		usecase: usecase,
-		Logger:  logger,
+		usecase:      usecase,
+		errorHandler: errorHandler,
+		Logger:       logger,
 	}
 }
 
@@ -28,10 +31,7 @@ func (uc *UserController) Me(c *gin.Context) {
 	user, err := uc.usecase.GetById(authUserId)
 
 	if err != nil {
-		if tryToHandleErr(c, err) {
-			return
-		}
-		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		uc.errorHandler.Handle(c, err)
 		return
 	}
 
@@ -40,18 +40,16 @@ func (uc *UserController) Me(c *gin.Context) {
 }
 
 func (uc *UserController) Get(c *gin.Context) {
-	Id, IsFound := tryToGetIdParamOrBadRequest(c, "id")
-	if !IsFound {
+	id, err := getParamAsInt64(c, "id")
+	if err != nil {
+		uc.errorHandler.Handle(c, err)
 		return
 	}
 
-	user, err := uc.usecase.GetById(Id)
+	user, err := uc.usecase.GetById(uint(id))
 
 	if err != nil {
-		if tryToHandleErr(c, err) {
-			return
-		}
-		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		uc.errorHandler.Handle(c, err)
 		return
 	}
 
@@ -62,10 +60,7 @@ func (uc *UserController) Get(c *gin.Context) {
 func (uc *UserController) List(c *gin.Context) {
 	paginationParams, err := getUserPaginationParams(c)
 	if err != nil {
-		if tryToHandleErr(c, err) {
-			return
-		}
-		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		uc.errorHandler.Handle(c, err)
 		return
 	}
 
@@ -75,7 +70,7 @@ func (uc *UserController) List(c *gin.Context) {
 
 	paginatedResult, err := uc.usecase.List(&params)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		uc.errorHandler.Handle(c, err)
 		return
 	}
 
@@ -100,10 +95,7 @@ func (uc *UserController) Create(c *gin.Context) {
 
 	createdUser, err := uc.usecase.Create(&user)
 	if err != nil {
-		if tryToHandleErr(c, err) {
-			return
-		}
-		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		uc.errorHandler.Handle(c, err)
 		return
 	}
 
@@ -121,10 +113,7 @@ func (uc *UserController) Login(c *gin.Context) {
 
 	loginResponse, err := uc.usecase.Login(&user)
 	if err != nil {
-		if tryToHandleErr(c, err) {
-			return
-		}
-		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		uc.errorHandler.Handle(c, err)
 		return
 	}
 
@@ -140,10 +129,7 @@ func (uc *UserController) RefreshTokens(c *gin.Context) {
 
 	refreshTokenResponse, err := uc.usecase.RefreshTokens(&refreshTokenRequest)
 	if err != nil {
-		if tryToHandleErr(c, err) {
-			return
-		}
-		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		uc.errorHandler.Handle(c, err)
 		return
 	}
 
@@ -151,8 +137,9 @@ func (uc *UserController) RefreshTokens(c *gin.Context) {
 }
 
 func (uc *UserController) Update(c *gin.Context) {
-	Id, IsFound := tryToGetIdParamOrBadRequest(c, "id")
-	if !IsFound {
+	id, err := getParamAsInt64(c, "id")
+	if err != nil {
+		uc.errorHandler.Handle(c, err)
 		return
 	}
 
@@ -164,12 +151,9 @@ func (uc *UserController) Update(c *gin.Context) {
 		return
 	}
 
-	updatedUser, err := uc.usecase.Update(authUserId, Id, &user)
+	updatedUser, err := uc.usecase.Update(authUserId, uint(id), &user)
 	if err != nil {
-		if tryToHandleErr(c, err) {
-			return
-		}
-		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+		uc.errorHandler.Handle(c, err)
 		return
 	}
 
@@ -179,18 +163,16 @@ func (uc *UserController) Update(c *gin.Context) {
 }
 
 func (uc *UserController) Delete(c *gin.Context) {
-	Id, IsFound := tryToGetIdParamOrBadRequest(c, "id")
-	if !IsFound {
+	id, err := getParamAsInt64(c, "id")
+	if err != nil {
+		uc.errorHandler.Handle(c, err)
 		return
 	}
 
 	authUserId := c.GetUint(string(UserIDContextKey))
 
-	if err := uc.usecase.Delete(authUserId, Id); err != nil {
-		if tryToHandleErr(c, err) {
-			return
-		}
-		c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+	if err := uc.usecase.Delete(authUserId, uint(id)); err != nil {
+		uc.errorHandler.Handle(c, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

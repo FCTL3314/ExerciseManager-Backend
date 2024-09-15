@@ -7,33 +7,81 @@ import (
 	"net/http"
 )
 
-func tryToHandleErr(c *gin.Context, err error) (IsHandled bool) {
+type ErrorHandlerFunc = func(c *gin.Context, err error) bool
+
+func handleObjectNotFound(c *gin.Context, err error) bool {
 	if errors.Is(err, domain.ErrObjectNotFound) {
 		c.JSON(http.StatusNotFound, domain.NotFoundResponse)
 		return true
 	}
+	return false
+}
 
+func handleAccessDenied(c *gin.Context, err error) bool {
 	if errors.Is(err, domain.ErrAccessDenied) {
 		c.JSON(http.StatusForbidden, domain.ForbiddenResponse)
 		return true
 	}
+	return false
+}
 
-	if errors.Is(err, domain.ErrInvalidAuthCredentials) {
-		c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsResponse)
+func handleInvalidParam(c *gin.Context, err error) bool {
+	if errors.Is(err, domain.ErrInvalidParam) {
+		c.JSON(http.StatusBadRequest, domain.InvalidURLParamResponse)
 		return true
 	}
+	return false
+}
 
+func handlePaginationLimitExceeded(c *gin.Context, err error) bool {
 	var limitErr *domain.ErrPaginationLimitExceeded
 	if errors.As(err, &limitErr) {
 		c.JSON(http.StatusBadRequest, domain.NewPaginationErrorResponse(limitErr.Error()))
 		return true
 	}
+	return false
+}
 
-	var uniqueConstraintErr *domain.ErrObjectUniqueConstraint
-	if errors.As(err, &uniqueConstraintErr) {
-		c.JSON(http.StatusConflict, domain.NewUniqueConstraintErrorResponse(err.Error()))
+func handleInvalidCredentials(c *gin.Context, err error) bool {
+	if errors.Is(err, domain.ErrInvalidAuthCredentials) {
+		c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsResponse)
 		return true
 	}
-
 	return false
+}
+
+type ErrorHandler struct {
+	handlers []ErrorHandlerFunc
+}
+
+func NewErrorHandler() *ErrorHandler {
+	return &ErrorHandler{}
+}
+
+func (eh *ErrorHandler) RegisterHandler(handler ErrorHandlerFunc) {
+	eh.handlers = append(eh.handlers, handler)
+}
+
+func (eh *ErrorHandler) Handle(c *gin.Context, err error) {
+	for _, handler := range eh.handlers {
+		if handler(c, err) {
+			return
+		}
+	}
+	c.JSON(http.StatusInternalServerError, domain.InternalServerErrorResponse)
+}
+
+func DefaultErrorHandler() *ErrorHandler {
+	eh := NewErrorHandler()
+	eh.RegisterHandler(handleObjectNotFound)
+	eh.RegisterHandler(handleAccessDenied)
+	eh.RegisterHandler(handleInvalidParam)
+	eh.RegisterHandler(handlePaginationLimitExceeded)
+	return eh
+}
+
+func UserErrorHandler() *ErrorHandler {
+	eh := DefaultErrorHandler()
+	eh.RegisterHandler(handleInvalidCredentials)
+	return eh
 }
