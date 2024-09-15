@@ -34,11 +34,11 @@ func NewJWTTokenManager(accessSecret, refreshSecret string, accessExpiry, refres
 }
 
 func (tm *JWTTokenManager) CreateUserAccessToken(user *domain.User) (string, error) {
-	return tm.CreateAccessToken(user.Id)
+	return tm.CreateAccessToken(user.ID)
 }
 
 func (tm *JWTTokenManager) CreateUserRefreshToken(user *domain.User) (string, error) {
-	return tm.CreateRefreshToken(user.Id)
+	return tm.CreateRefreshToken(user.ID)
 }
 
 func (tm *JWTTokenManager) IsAccessTokenValid(tokenStr string) (bool, error) {

@@ -75,7 +75,7 @@ func (uu *UserUsecase) Create(createUserRequest *domain.CreateUserRequest) (*dom
 		return nil, err
 	}
 
-	user := createUserRequest.ToUser()
+	user := domain.NewUserFromCreateRequest(createUserRequest)
 	user.Password = hashedPassword
 
 	if _, err := uu.userRepository.GetByUsername(user.Username); err != nil {
@@ -153,7 +153,7 @@ func (uu *UserUsecase) Update(authUserId uint, id uint, updateUserRequest *domai
 		return nil, err
 	}
 
-	updateUserRequest.ApplyToUser(userToUpdate)
+	userToUpdate.ApplyUpdate(updateUserRequest)
 
 	return uu.userRepository.Update(userToUpdate)
 }
