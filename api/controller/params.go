@@ -7,6 +7,12 @@ import (
 	"strconv"
 )
 
+type ContextKey string
+
+const (
+	UserIDContextKey ContextKey = "userID"
+)
+
 func tryToGetIdParamOrBadRequest(c *gin.Context, param string) (Id uint, IsFound bool) {
 	id, err := strconv.ParseUint(c.Param(param), 10, 64)
 	if err != nil {

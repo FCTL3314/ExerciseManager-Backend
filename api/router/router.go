@@ -9,7 +9,6 @@ import (
 	"ExerciseManager/internal/repository"
 	"ExerciseManager/internal/tokenutil"
 	"ExerciseManager/internal/usecase"
-	"ExerciseManager/internal/validation"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -79,7 +78,6 @@ func registerUserRoutes(
 	)
 	userController := controller.NewUserController(
 		userUsecase,
-		validation.NewUserValidator(),
 		logger,
 	)
 	userRouter := NewUserRouter(usersRouter, tokenManager, userController, cfg)

@@ -3,31 +3,27 @@ package controller
 import (
 	"ExerciseManager/bootstrap"
 	"ExerciseManager/internal/domain"
-	"ExerciseManager/internal/validation"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type UserController struct {
-	usecase   domain.UserUsecase
-	validator validation.IUserValidator
-	Logger    bootstrap.Logger
+	usecase domain.UserUsecase
+	Logger  bootstrap.Logger
 }
 
 func NewUserController(
 	usecase domain.UserUsecase,
-	validator validation.IUserValidator,
 	logger bootstrap.Logger,
 ) *UserController {
 	return &UserController{
-		usecase:   usecase,
-		validator: validator,
-		Logger:    logger,
+		usecase: usecase,
+		Logger:  logger,
 	}
 }
 
 func (uc *UserController) Me(c *gin.Context) {
-	authUserId := c.GetUint("x-user-id")
+	authUserId := c.GetUint(string(UserIDContextKey))
 
 	user, err := uc.usecase.GetById(authUserId)
 
@@ -102,11 +98,6 @@ func (uc *UserController) Create(c *gin.Context) {
 		return
 	}
 
-	if err := uc.validator.ValidateCreateUserRequest(&user); err != nil {
-		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
-		return
-	}
-
 	createdUser, err := uc.usecase.Create(&user)
 	if err != nil {
 		if tryToHandleErr(c, err) {
@@ -128,11 +119,6 @@ func (uc *UserController) Login(c *gin.Context) {
 		return
 	}
 
-	if err := uc.validator.ValidateLoginUserRequest(&user); err != nil {
-		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
-		return
-	}
-
 	loginResponse, err := uc.usecase.Login(&user)
 	if err != nil {
 		if tryToHandleErr(c, err) {
@@ -142,17 +128,12 @@ func (uc *UserController) Login(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, loginResponse)
+	c.JSON(http.StatusOK, loginResponse)
 }
 
 func (uc *UserController) RefreshTokens(c *gin.Context) {
 	var refreshTokenRequest domain.RefreshTokenRequest
 	if err := c.ShouldBindJSON(&refreshTokenRequest); err != nil {
-		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
-		return
-	}
-
-	if err := uc.validator.ValidateRefreshTokenRequest(&refreshTokenRequest); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
 		return
 	}
@@ -166,7 +147,7 @@ func (uc *UserController) RefreshTokens(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, refreshTokenResponse)
+	c.JSON(http.StatusOK, refreshTokenResponse)
 }
 
 func (uc *UserController) Update(c *gin.Context) {
@@ -175,15 +156,10 @@ func (uc *UserController) Update(c *gin.Context) {
 		return
 	}
 
-	authUserId := c.GetUint("x-user-id")
+	authUserId := c.GetUint(string(UserIDContextKey))
 
 	var user domain.UpdateUserRequest
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
-		return
-	}
-
-	if err := uc.validator.ValidateUpdateUserRequest(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
 		return
 	}
@@ -208,7 +184,7 @@ func (uc *UserController) Delete(c *gin.Context) {
 		return
 	}
 
-	authUserId := c.GetUint("x-user-id")
+	authUserId := c.GetUint(string(UserIDContextKey))
 
 	if err := uc.usecase.Delete(authUserId, Id); err != nil {
 		if tryToHandleErr(c, err) {

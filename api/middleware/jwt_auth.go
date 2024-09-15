@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"ExerciseManager/api/controller"
 	"ExerciseManager/internal/domain"
 	"ExerciseManager/internal/tokenutil"
 	"net/http"
@@ -37,7 +38,7 @@ func JwtAuthMiddleware(tokenManager tokenutil.IJWTTokenManager) gin.HandlerFunc 
 			return
 		}
 
-		c.Set("x-user-id", userId)
+		c.Set(string(controller.UserIDContextKey), userId)
 		c.Next()
 	}
 }
