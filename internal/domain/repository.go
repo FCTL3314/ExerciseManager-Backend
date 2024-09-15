@@ -42,3 +42,7 @@ type UserRepository interface {
 	Repository[User]
 	GetByUsername(username string) (*User, error)
 }
+
+type WorkoutRepository interface {
+	Repository[Workout]
+}
