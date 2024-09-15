@@ -15,5 +15,5 @@
 
 # ⚒️ Development
 1. Download dependencies: `go mod download`
-2. Start docker services: `make up_local_services`
-3. Install goose for migrations: `go install github.com/pressly/goose/v3/cmd/goose@latest`
+2. Install goose for migrations: `go install github.com/pressly/goose/v3/cmd/goose@latest`
+3. Start docker services: `make up_local_services`
