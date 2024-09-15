@@ -10,7 +10,6 @@ var (
 	ErrObjectNotFound         = errors.New("object not found")
 	ErrAccessDenied           = errors.New("access denied")
 	ErrInvalidAuthCredentials = errors.New("invalid auth credentials")
-	ErrInvalidURLParam        = errors.New("invalid url param")
 )
 
 type ErrPaginationLimitExceeded struct {
@@ -30,4 +29,12 @@ func (e *ErrObjectUniqueConstraint) Error() string {
 		"Unique constraint violation on fields \"%s\". An object with values for these fields already exists.",
 		strings.Join(e.Fields, ","),
 	)
+}
+
+type ErrInvalidURLParam struct {
+	Param string
+}
+
+func (e *ErrInvalidURLParam) Error() string {
+	return fmt.Sprintf("Invalid \"%s\" URL parameter received", e.Param)
 }

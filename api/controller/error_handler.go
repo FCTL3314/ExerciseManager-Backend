@@ -26,8 +26,9 @@ func handleAccessDenied(c *gin.Context, err error) bool {
 }
 
 func handleInvalidParam(c *gin.Context, err error) bool {
-	if errors.Is(err, domain.ErrInvalidURLParam) {
-		c.JSON(http.StatusBadRequest, domain.InvalidURLParamResponse)
+	var errInvalidURLParam *domain.ErrInvalidURLParam
+	if errors.As(err, &errInvalidURLParam) {
+		c.JSON(http.StatusBadRequest, domain.NewInvalidURLParamResponse(errInvalidURLParam.Error()))
 		return true
 	}
 	return false

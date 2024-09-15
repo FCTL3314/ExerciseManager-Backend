@@ -37,6 +37,13 @@ func NewUniqueConstraintErrorResponse(detail string) *ErrorResponse {
 	)
 }
 
+func NewInvalidURLParamResponse(detail string) *ErrorResponse {
+	return NewErrorResponse(
+		detail,
+		"invalid_url_param",
+	)
+}
+
 var (
 	InternalServerErrorResponse = NewErrorResponse(
 		"Internal Server Error",
@@ -49,10 +56,6 @@ var (
 	ForbiddenResponse = NewErrorResponse(
 		"Forbidden",
 		"forbidden",
-	)
-	InvalidURLParamResponse = NewErrorResponse(
-		"Invalid url param",
-		"invalid_url_param",
 	)
 	InvalidAuthCredentialsResponse = NewErrorResponse(
 		"Invalid authentication credentials provided",
