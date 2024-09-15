@@ -34,17 +34,26 @@ func handleInvalidParam(c *gin.Context, err error) bool {
 }
 
 func handlePaginationLimitExceeded(c *gin.Context, err error) bool {
-	var limitErr *domain.ErrPaginationLimitExceeded
-	if errors.As(err, &limitErr) {
-		c.JSON(http.StatusBadRequest, domain.NewPaginationErrorResponse(limitErr.Error()))
+	var errPaginationLimit *domain.ErrPaginationLimitExceeded
+	if errors.As(err, &errPaginationLimit) {
+		c.JSON(http.StatusBadRequest, domain.NewPaginationErrorResponse(errPaginationLimit.Error()))
 		return true
 	}
 	return false
 }
 
-func handleInvalidCredentials(c *gin.Context, err error) bool {
+func handleAuthInvalidCredentials(c *gin.Context, err error) bool {
 	if errors.Is(err, domain.ErrInvalidAuthCredentials) {
 		c.JSON(http.StatusUnauthorized, domain.InvalidAuthCredentialsResponse)
+		return true
+	}
+	return false
+}
+
+func handleUniqueConstraint(c *gin.Context, err error) bool {
+	var errObjectUniqueConstraint *domain.ErrObjectUniqueConstraint
+	if errors.As(err, &errObjectUniqueConstraint) {
+		c.JSON(http.StatusUnauthorized, domain.NewUniqueConstraintErrorResponse(err.Error()))
 		return true
 	}
 	return false
@@ -82,6 +91,7 @@ func DefaultErrorHandler() *ErrorHandler {
 
 func UserErrorHandler() *ErrorHandler {
 	eh := DefaultErrorHandler()
-	eh.RegisterHandler(handleInvalidCredentials)
+	eh.RegisterHandler(handleAuthInvalidCredentials)
+	eh.RegisterHandler(handleUniqueConstraint)
 	return eh
 }
