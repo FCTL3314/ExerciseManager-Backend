@@ -65,24 +65,29 @@ func registerUserRoutes(
 	usersRouter := baseRouter.Group("/users/")
 	usersRouter.Use(middleware.ErrorLoggerMiddleware(logger))
 
-	tokenManager := tokenutil.NewJWTTokenManager(
-		cfg.JWTAccessSecret, cfg.JWTRefreshSecret, cfg.JWTAccessExpire, cfg.JWTRefreshExpire,
-	)
-
 	userRepository := repository.NewUserRepository(db)
+	accessChecker := accesscontrol.NewUserAccess()
+	passwordHasher := auth.NewBcryptPasswordHasher()
+	tokenManager := tokenutil.NewJWTTokenManager(
+		cfg.JWTAccessSecret,
+		cfg.JWTRefreshSecret,
+		cfg.JWTAccessExpire,
+		cfg.JWTRefreshExpire,
+	)
 	userUsecase := usecase.NewUserUsecase(
 		userRepository,
-		accesscontrol.NewUserAccess(),
-		auth.NewBcryptPasswordHasher(),
+		accessChecker,
+		passwordHasher,
 		tokenManager,
 	)
+
 	errorHandler := controller.UserErrorHandler()
 	userController := controller.NewUserController(
 		userUsecase,
 		errorHandler,
 		logger,
 	)
-	userRouter := NewUserRouter(usersRouter, tokenManager, userController, cfg)
 
+	userRouter := NewUserRouter(usersRouter, tokenManager, userController, cfg)
 	userRouter.RegisterAll()
 }
