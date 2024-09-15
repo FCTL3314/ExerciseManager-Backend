@@ -66,7 +66,7 @@ func registerUserRoutes(
 	usersRouter := baseRouter.Group("/users/")
 	usersRouter.Use(middleware.ErrorLoggerMiddleware(logger))
 
-	tokenManager := tokenutil.NewTokenManager(
+	tokenManager := tokenutil.NewJWTTokenManager(
 		cfg.JWTAccessSecret, cfg.JWTRefreshSecret, cfg.JWTAccessExpire, cfg.JWTRefreshExpire,
 	)
 
@@ -76,7 +76,6 @@ func registerUserRoutes(
 		accesscontrol.NewUserAccess(),
 		auth.NewBcryptPasswordHasher(),
 		tokenManager,
-		cfg,
 	)
 	userController := controller.NewUserController(
 		userUsecase,

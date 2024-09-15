@@ -44,7 +44,7 @@ type UpdateUserRequest struct {
 }
 
 type User struct {
-	ID        uint      `json:"id"`
+	Id        uint      `json:"id"`
 	Username  string    `json:"username"`
 	Password  string    `json:"password"`
 	CreatedAt time.Time `json:"created_at"`
@@ -52,7 +52,7 @@ type User struct {
 
 func (u *User) ToResponseUser() *ResponseUser {
 	return &ResponseUser{
-		ID:        u.ID,
+		ID:        u.Id,
 		Username:  u.Username,
 		CreatedAt: u.CreatedAt,
 	}

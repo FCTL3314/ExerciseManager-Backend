@@ -8,14 +8,13 @@ import (
 	"ExerciseManager/internal/tokenutil"
 	"errors"
 	"gorm.io/gorm"
-	"strconv"
 )
 
 type UserUsecase struct {
 	userRepository    domain.UserRepository
 	userAccessChecker accesscontrol.UserChecker
 	passwordHasher    auth.PasswordHasher
-	tokenManager      *tokenutil.TokenManager
+	tokenManager      tokenutil.IJWTTokenManager
 	cfg               *bootstrap.Config
 }
 
@@ -23,15 +22,13 @@ func NewUserUsecase(
 	userRepository domain.UserRepository,
 	userAccessChecker accesscontrol.UserChecker,
 	passwordHasher auth.PasswordHasher,
-	tokenManager *tokenutil.TokenManager,
-	cfg *bootstrap.Config,
+	tokenManager tokenutil.IJWTTokenManager,
 ) *UserUsecase {
 	return &UserUsecase{
 		userRepository:    userRepository,
 		userAccessChecker: userAccessChecker,
 		passwordHasher:    passwordHasher,
 		tokenManager:      tokenManager,
-		cfg:               cfg,
 	}
 }
 
@@ -72,40 +69,41 @@ func (uu *UserUsecase) List(params *domain.Params) (*domain.PaginatedResult[*dom
 	return &domain.PaginatedResult[*domain.User]{Results: users, Count: count}, nil
 }
 
-func (uu *UserUsecase) Create(createUser *domain.CreateUserRequest) (*domain.User, error) {
-	hashedPassword, err := uu.passwordHasher.Hash(createUser.Password)
+func (uu *UserUsecase) Create(createUserRequest *domain.CreateUserRequest) (*domain.User, error) {
+	hashedPassword, err := uu.passwordHasher.Hash(createUserRequest.Password)
 	if err != nil {
-		return &domain.User{}, err
+		return nil, err
 	}
-	createUser.Password = hashedPassword
 
-	if _, err := uu.userRepository.GetByUsername(createUser.Username); err != nil {
+	user := createUserRequest.ToUser()
+	user.Password = hashedPassword
+
+	if _, err := uu.userRepository.GetByUsername(user.Username); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			user := createUser.ToUser()
 			return uu.userRepository.Create(user)
 		}
 		return nil, err
 	}
 
-	return &domain.User{}, &domain.ErrObjectUniqueConstraint{Fields: []string{"username"}}
+	return nil, &domain.ErrObjectUniqueConstraint{Fields: []string{"username"}}
 }
 
-func (uu *UserUsecase) Login(loginUser *domain.LoginUserRequest) (*domain.TokensResponse, error) {
-	targetUser, err := uu.userRepository.GetByUsername(loginUser.Username)
+func (uu *UserUsecase) Login(loginUserRequest *domain.LoginUserRequest) (*domain.TokensResponse, error) {
+	targetUser, err := uu.userRepository.GetByUsername(loginUserRequest.Username)
 	if err != nil {
 		return nil, domain.ErrInvalidAuthCredentials
 	}
 
-	err = uu.passwordHasher.Compare(targetUser.Password, loginUser.Password)
+	err = uu.passwordHasher.Compare(targetUser.Password, loginUserRequest.Password)
 	if err != nil {
 		return nil, domain.ErrInvalidAuthCredentials
 	}
 
-	accessToken, err := uu.tokenManager.CreateAccessToken(targetUser)
+	accessToken, err := uu.tokenManager.CreateUserAccessToken(targetUser)
 	if err != nil {
 		return nil, err
 	}
-	refreshToken, err := uu.tokenManager.CreateRefreshToken(targetUser)
+	refreshToken, err := uu.tokenManager.CreateUserRefreshToken(targetUser)
 	if err != nil {
 		return nil, err
 	}
@@ -117,26 +115,21 @@ func (uu *UserUsecase) Login(loginUser *domain.LoginUserRequest) (*domain.Tokens
 }
 
 func (uu *UserUsecase) RefreshTokens(refreshTokenRequest *domain.RefreshTokenRequest) (*domain.TokensResponse, error) {
-	userIDString, err := uu.tokenManager.ExtractUserIDFromRefreshToken(refreshTokenRequest.RefreshToken)
+	userId, err := uu.tokenManager.ExtractUserIDFromRefreshToken(refreshTokenRequest.RefreshToken)
 	if err != nil {
 		return nil, domain.ErrInvalidAuthCredentials
 	}
 
-	userID, err := strconv.ParseUint(userIDString, 10, 64)
+	targetUser, err := uu.userRepository.GetById(userId)
 	if err != nil {
 		return nil, domain.ErrInvalidAuthCredentials
 	}
 
-	targetUser, err := uu.userRepository.GetById(uint(userID))
-	if err != nil {
-		return nil, domain.ErrInvalidAuthCredentials
-	}
-
-	accessToken, err := uu.tokenManager.CreateAccessToken(targetUser)
+	accessToken, err := uu.tokenManager.CreateUserAccessToken(targetUser)
 	if err != nil {
 		return nil, err
 	}
-	refreshToken, err := uu.tokenManager.CreateRefreshToken(targetUser)
+	refreshToken, err := uu.tokenManager.CreateUserRefreshToken(targetUser)
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +140,7 @@ func (uu *UserUsecase) RefreshTokens(refreshTokenRequest *domain.RefreshTokenReq
 	}, nil
 }
 
-func (uu *UserUsecase) Update(authUserId uint, id uint, updateUser *domain.UpdateUserRequest) (*domain.User, error) {
+func (uu *UserUsecase) Update(authUserId uint, id uint, updateUserRequest *domain.UpdateUserRequest) (*domain.User, error) {
 	if !uu.userAccessChecker.CanAccessUser(authUserId, id) {
 		return nil, domain.ErrAccessDenied
 	}
@@ -160,7 +153,7 @@ func (uu *UserUsecase) Update(authUserId uint, id uint, updateUser *domain.Updat
 		return nil, err
 	}
 
-	updateUser.ApplyToUser(userToUpdate)
+	updateUserRequest.ApplyToUser(userToUpdate)
 
 	return uu.userRepository.Update(userToUpdate)
 }
