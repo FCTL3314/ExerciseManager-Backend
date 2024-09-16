@@ -95,15 +95,15 @@ func (tm *JWTTokenManager) extractIdFromToken(tokenStr string, secret string) (s
 }
 
 func (tm *JWTTokenManager) CreateAccessToken(id int64) (string, error) {
-	return tm.createToken(id, tm.AccessSecret)
+	return tm.createToken(id, tm.AccessSecret, tm.AccessExpiry)
 }
 
 func (tm *JWTTokenManager) CreateRefreshToken(id int64) (string, error) {
-	return tm.createToken(id, tm.RefreshSecret)
+	return tm.createToken(id, tm.RefreshSecret, tm.RefreshExpiry)
 }
 
-func (tm *JWTTokenManager) createToken(id int64, secret string) (string, error) {
-	exp := time.Now().Add(tm.AccessExpiry)
+func (tm *JWTTokenManager) createToken(id int64, secret string, expiry time.Duration) (string, error) {
+	exp := time.Now().Add(expiry)
 	claims := &jwt.RegisteredClaims{
 		ID:        strconv.FormatInt(id, 10),
 		ExpiresAt: jwt.NewNumericDate(exp),

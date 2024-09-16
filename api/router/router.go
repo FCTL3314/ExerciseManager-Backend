@@ -4,8 +4,8 @@ import (
 	"ExerciseManager/api/controller"
 	"ExerciseManager/api/middleware"
 	"ExerciseManager/bootstrap"
-	"ExerciseManager/internal/accesscontrol"
 	"ExerciseManager/internal/auth"
+	"ExerciseManager/internal/permission"
 	"ExerciseManager/internal/repository"
 	"ExerciseManager/internal/tokenutil"
 	"ExerciseManager/internal/usecase"
@@ -66,7 +66,7 @@ func registerUserRoutes(
 	usersRouter.Use(middleware.ErrorLoggerMiddleware(logger))
 
 	userRepository := repository.NewUserRepository(db)
-	accessChecker := accesscontrol.NewUserAccess()
+	accessManager := permission.BuildDefaultAccessManager()
 	passwordHasher := auth.NewBcryptPasswordHasher()
 	tokenManager := tokenutil.NewJWTTokenManager(
 		cfg.JWTAccessSecret,
@@ -76,7 +76,7 @@ func registerUserRoutes(
 	)
 	userUsecase := usecase.NewUserUsecase(
 		userRepository,
-		accessChecker,
+		accessManager,
 		passwordHasher,
 		tokenManager,
 	)

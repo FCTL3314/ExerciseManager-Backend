@@ -2,33 +2,33 @@ package usecase
 
 import (
 	"ExerciseManager/bootstrap"
-	"ExerciseManager/internal/accesscontrol"
 	"ExerciseManager/internal/auth"
 	"ExerciseManager/internal/domain"
+	"ExerciseManager/internal/permission"
 	"ExerciseManager/internal/tokenutil"
 	"errors"
 	"gorm.io/gorm"
 )
 
 type UserUsecase struct {
-	userRepository    domain.UserRepository
-	userAccessChecker accesscontrol.UserChecker
-	passwordHasher    auth.PasswordHasher
-	tokenManager      tokenutil.IJWTTokenManager
-	cfg               *bootstrap.Config
+	userRepository domain.UserRepository
+	accessManager  permission.AccessPolicy
+	passwordHasher auth.PasswordHasher
+	tokenManager   tokenutil.IJWTTokenManager
+	cfg            *bootstrap.Config
 }
 
 func NewUserUsecase(
 	userRepository domain.UserRepository,
-	userAccessChecker accesscontrol.UserChecker,
+	accessManager permission.AccessPolicy,
 	passwordHasher auth.PasswordHasher,
 	tokenManager tokenutil.IJWTTokenManager,
 ) *UserUsecase {
 	return &UserUsecase{
-		userRepository:    userRepository,
-		userAccessChecker: userAccessChecker,
-		passwordHasher:    passwordHasher,
-		tokenManager:      tokenManager,
+		userRepository: userRepository,
+		accessManager:  accessManager,
+		passwordHasher: passwordHasher,
+		tokenManager:   tokenManager,
 	}
 }
 
@@ -141,10 +141,6 @@ func (uu *UserUsecase) RefreshTokens(refreshTokenRequest *domain.RefreshTokenReq
 }
 
 func (uu *UserUsecase) Update(authUserId int64, id int64, updateUserRequest *domain.UpdateUserRequest) (*domain.User, error) {
-	if !uu.userAccessChecker.HasAccessToUser(authUserId, id) {
-		return nil, domain.ErrAccessDenied
-	}
-
 	userToUpdate, err := uu.userRepository.GetById(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -153,21 +149,32 @@ func (uu *UserUsecase) Update(authUserId int64, id int64, updateUserRequest *dom
 		return nil, err
 	}
 
+	if !uu.accessManager.HasAccess(authUserId, userToUpdate) {
+		return nil, domain.ErrAccessDenied
+	}
+
 	userToUpdate.ApplyUpdate(updateUserRequest)
 
-	return uu.userRepository.Update(userToUpdate)
+	if _, err := uu.userRepository.GetByUsername(userToUpdate.Username); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return uu.userRepository.Update(userToUpdate)
+		}
+		return nil, err
+	}
+
+	return nil, &domain.ErrObjectUniqueConstraint{Fields: []string{"username"}}
 }
 
 func (uu *UserUsecase) Delete(authUserId int64, id int64) error {
-	if !uu.userAccessChecker.HasAccessToUser(authUserId, id) {
-		return domain.ErrAccessDenied
-	}
-
 	if _, err := uu.userRepository.GetById(id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return domain.ErrObjectNotFound
 		}
 		return err
+	}
+
+	if !uu.accessManager.HasAccess(authUserId, id) {
+		return domain.ErrAccessDenied
 	}
 
 	return uu.userRepository.Delete(id)
