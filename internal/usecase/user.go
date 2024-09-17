@@ -4,10 +4,9 @@ import (
 	"ExerciseManager/bootstrap"
 	"ExerciseManager/internal/auth"
 	"ExerciseManager/internal/domain"
+	"ExerciseManager/internal/errormapper"
 	"ExerciseManager/internal/permission"
 	"ExerciseManager/internal/tokenutil"
-	"errors"
-	"gorm.io/gorm"
 )
 
 type UserUsecase struct {
@@ -15,6 +14,7 @@ type UserUsecase struct {
 	accessManager  permission.AccessPolicy
 	passwordHasher auth.PasswordHasher
 	tokenManager   tokenutil.IJWTTokenManager
+	errorMapper    errormapper.Chain
 	cfg            *bootstrap.Config
 }
 
@@ -23,22 +23,21 @@ func NewUserUsecase(
 	accessManager permission.AccessPolicy,
 	passwordHasher auth.PasswordHasher,
 	tokenManager tokenutil.IJWTTokenManager,
+	errorMapper errormapper.Chain,
 ) *UserUsecase {
 	return &UserUsecase{
 		userRepository: userRepository,
 		accessManager:  accessManager,
 		passwordHasher: passwordHasher,
 		tokenManager:   tokenManager,
+		errorMapper:    errorMapper,
 	}
 }
 
 func (uu *UserUsecase) GetById(id int64) (*domain.User, error) {
 	user, err := uu.userRepository.GetById(id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, domain.ErrObjectNotFound
-		}
-		return nil, err
+		return nil, uu.errorMapper.MapError(err)
 	}
 
 	return user, nil
@@ -47,10 +46,7 @@ func (uu *UserUsecase) GetById(id int64) (*domain.User, error) {
 func (uu *UserUsecase) Get(params *domain.FilterParams) (*domain.User, error) {
 	user, err := uu.userRepository.Get(params)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, domain.ErrObjectNotFound
-		}
-		return nil, err
+		return nil, uu.errorMapper.MapError(err)
 	}
 	return user, nil
 }
@@ -58,12 +54,12 @@ func (uu *UserUsecase) Get(params *domain.FilterParams) (*domain.User, error) {
 func (uu *UserUsecase) List(params *domain.Params) (*domain.PaginatedResult[*domain.User], error) {
 	users, err := uu.userRepository.Fetch(params)
 	if err != nil {
-		return &domain.PaginatedResult[*domain.User]{}, err
+		return nil, uu.errorMapper.MapError(err)
 	}
 
 	count, err := uu.userRepository.Count(&domain.FilterParams{})
 	if err != nil {
-		return &domain.PaginatedResult[*domain.User]{}, err
+		return nil, uu.errorMapper.MapError(err)
 	}
 
 	return &domain.PaginatedResult[*domain.User]{Results: users, Count: count}, nil
@@ -72,20 +68,17 @@ func (uu *UserUsecase) List(params *domain.Params) (*domain.PaginatedResult[*dom
 func (uu *UserUsecase) Create(createUserRequest *domain.CreateUserRequest) (*domain.User, error) {
 	hashedPassword, err := uu.passwordHasher.Hash(createUserRequest.Password)
 	if err != nil {
-		return nil, err
+		return nil, uu.errorMapper.MapError(err)
 	}
 
 	user := domain.NewUserFromCreateRequest(createUserRequest)
 	user.Password = hashedPassword
 
-	if _, err := uu.userRepository.GetByUsername(user.Username); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return uu.userRepository.Create(user)
-		}
-		return nil, err
+	createdUser, err := uu.userRepository.Create(user)
+	if err != nil {
+		return nil, uu.errorMapper.MapError(err)
 	}
-
-	return nil, &domain.ErrObjectUniqueConstraint{Fields: []string{"username"}}
+	return createdUser, nil
 }
 
 func (uu *UserUsecase) Login(loginUserRequest *domain.LoginUserRequest) (*domain.TokensResponse, error) {
@@ -101,11 +94,11 @@ func (uu *UserUsecase) Login(loginUserRequest *domain.LoginUserRequest) (*domain
 
 	accessToken, err := uu.tokenManager.CreateUserAccessToken(targetUser)
 	if err != nil {
-		return nil, err
+		return nil, uu.errorMapper.MapError(err)
 	}
 	refreshToken, err := uu.tokenManager.CreateUserRefreshToken(targetUser)
 	if err != nil {
-		return nil, err
+		return nil, uu.errorMapper.MapError(err)
 	}
 
 	return &domain.TokensResponse{
@@ -127,11 +120,11 @@ func (uu *UserUsecase) RefreshTokens(refreshTokenRequest *domain.RefreshTokenReq
 
 	accessToken, err := uu.tokenManager.CreateUserAccessToken(targetUser)
 	if err != nil {
-		return nil, err
+		return nil, uu.errorMapper.MapError(err)
 	}
 	refreshToken, err := uu.tokenManager.CreateUserRefreshToken(targetUser)
 	if err != nil {
-		return nil, err
+		return nil, uu.errorMapper.MapError(err)
 	}
 
 	return &domain.TokensResponse{
@@ -143,10 +136,7 @@ func (uu *UserUsecase) RefreshTokens(refreshTokenRequest *domain.RefreshTokenReq
 func (uu *UserUsecase) Update(authUserId int64, id int64, updateUserRequest *domain.UpdateUserRequest) (*domain.User, error) {
 	userToUpdate, err := uu.userRepository.GetById(id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, domain.ErrObjectNotFound
-		}
-		return nil, err
+		return nil, uu.errorMapper.MapError(err)
 	}
 
 	if !uu.accessManager.HasAccess(authUserId, userToUpdate) {
@@ -154,26 +144,20 @@ func (uu *UserUsecase) Update(authUserId int64, id int64, updateUserRequest *dom
 	}
 
 	userToUpdate.ApplyUpdate(updateUserRequest)
-
-	if _, err := uu.userRepository.GetByUsername(userToUpdate.Username); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return uu.userRepository.Update(userToUpdate)
-		}
-		return nil, err
+	updatedUser, err := uu.userRepository.Update(userToUpdate)
+	if err != nil {
+		return nil, uu.errorMapper.MapError(err)
 	}
-
-	return nil, &domain.ErrObjectUniqueConstraint{Fields: []string{"username"}}
+	return updatedUser, nil
 }
 
 func (uu *UserUsecase) Delete(authUserId int64, id int64) error {
-	if _, err := uu.userRepository.GetById(id); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return domain.ErrObjectNotFound
-		}
-		return err
+	user, err := uu.userRepository.GetById(id)
+	if err != nil {
+		return uu.errorMapper.MapError(err)
 	}
 
-	if !uu.accessManager.HasAccess(authUserId, id) {
+	if !uu.accessManager.HasAccess(authUserId, user) {
 		return domain.ErrAccessDenied
 	}
 

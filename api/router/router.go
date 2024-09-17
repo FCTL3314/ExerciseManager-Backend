@@ -5,6 +5,7 @@ import (
 	"ExerciseManager/api/middleware"
 	"ExerciseManager/bootstrap"
 	"ExerciseManager/internal/auth"
+	"ExerciseManager/internal/errormapper"
 	"ExerciseManager/internal/permission"
 	"ExerciseManager/internal/repository"
 	"ExerciseManager/internal/tokenutil"
@@ -74,11 +75,13 @@ func registerUserRoutes(
 		cfg.JWTAccessExpire,
 		cfg.JWTRefreshExpire,
 	)
+	errorMapper := errormapper.BuildAllErrorsMapperChain()
 	userUsecase := usecase.NewUserUsecase(
 		userRepository,
 		accessManager,
 		passwordHasher,
 		tokenManager,
+		errorMapper,
 	)
 
 	errorHandler := controller.UserErrorHandler()

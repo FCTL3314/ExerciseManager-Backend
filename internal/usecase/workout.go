@@ -2,29 +2,32 @@ package usecase
 
 import (
 	"ExerciseManager/internal/domain"
-	"errors"
-	"gorm.io/gorm"
+	"ExerciseManager/internal/errormapper"
+	"ExerciseManager/internal/permission"
 )
 
 type WorkoutUsecase struct {
 	workoutRepository domain.WorkoutRepository
+	accessManager     permission.AccessPolicy
+	errorMapper       errormapper.Chain
 }
 
 func NewWorkoutUsecase(
 	workoutRepository domain.WorkoutRepository,
+	accessManager permission.AccessPolicy,
+	errorMapper errormapper.Chain,
 ) *WorkoutUsecase {
 	return &WorkoutUsecase{
 		workoutRepository: workoutRepository,
+		accessManager:     accessManager,
+		errorMapper:       errorMapper,
 	}
 }
 
 func (ur *WorkoutUsecase) GetById(id int64) (*domain.Workout, error) {
 	workout, err := ur.workoutRepository.GetById(id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, domain.ErrObjectNotFound
-		}
-		return nil, err
+		return nil, ur.errorMapper.MapError(err)
 	}
 
 	return workout, nil
@@ -33,10 +36,7 @@ func (ur *WorkoutUsecase) GetById(id int64) (*domain.Workout, error) {
 func (ur *WorkoutUsecase) Get(params *domain.FilterParams) (*domain.Workout, error) {
 	workout, err := ur.workoutRepository.Get(params)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, domain.ErrObjectNotFound
-		}
-		return nil, err
+		return nil, ur.errorMapper.MapError(err)
 	}
 	return workout, nil
 }
@@ -44,12 +44,12 @@ func (ur *WorkoutUsecase) Get(params *domain.FilterParams) (*domain.Workout, err
 func (ur *WorkoutUsecase) List(params *domain.Params) (*domain.PaginatedResult[*domain.Workout], error) {
 	workouts, err := ur.workoutRepository.Fetch(params)
 	if err != nil {
-		return &domain.PaginatedResult[*domain.Workout]{}, err
+		return nil, ur.errorMapper.MapError(err)
 	}
 
 	count, err := ur.workoutRepository.Count(&domain.FilterParams{})
 	if err != nil {
-		return &domain.PaginatedResult[*domain.Workout]{}, err
+		return nil, ur.errorMapper.MapError(err)
 	}
 
 	return &domain.PaginatedResult[*domain.Workout]{Results: workouts, Count: count}, nil
@@ -61,33 +61,32 @@ func (ur *WorkoutUsecase) Create(createWorkoutRequest *domain.CreateWorkoutReque
 }
 
 func (ur *WorkoutUsecase) Update(authUserId int64, id int64, updateWorkoutRequest *domain.UpdateWorkoutRequest) (*domain.Workout, error) {
-	// if !ur.accessManager.HasAccessToUser(authUserId, id) {
-	// 	return nil, domain.ErrAccessDenied
-	// }
-
-	userToUpdate, err := ur.workoutRepository.GetById(id)
+	workoutToUpdate, err := ur.workoutRepository.GetById(id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, domain.ErrObjectNotFound
-		}
-		return nil, err
+		return nil, ur.errorMapper.MapError(err)
 	}
 
-	userToUpdate.ApplyUpdate(updateWorkoutRequest)
+	if !ur.accessManager.HasAccess(authUserId, workoutToUpdate) {
+		return nil, domain.ErrAccessDenied
+	}
 
-	return ur.workoutRepository.Update(userToUpdate)
+	workoutToUpdate.ApplyUpdate(updateWorkoutRequest)
+
+	updatedWorkout, err := ur.workoutRepository.Update(workoutToUpdate)
+	if err != nil {
+		return nil, ur.errorMapper.MapError(err)
+	}
+	return updatedWorkout, nil
 }
 
 func (ur *WorkoutUsecase) Delete(authUserId int64, id int64) error {
-	// if !ur.accessManager.HasAccessToUser(authUserId, id) {
-	// 	return domain.ErrAccessDenied
-	// }
+	workout, err := ur.workoutRepository.GetById(id)
+	if err != nil {
+		return ur.errorMapper.MapError(err)
+	}
 
-	if _, err := ur.workoutRepository.GetById(id); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return domain.ErrObjectNotFound
-		}
-		return err
+	if !ur.accessManager.HasAccess(authUserId, workout) {
+		return domain.ErrAccessDenied
 	}
 
 	return ur.workoutRepository.Delete(id)

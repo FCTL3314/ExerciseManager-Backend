@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
-	"strings"
 )
 
 type PostgresErrUniqueViolationMapper struct{}
@@ -13,25 +12,17 @@ type PostgresErrUniqueViolationMapper struct{}
 func (m *PostgresErrUniqueViolationMapper) MapError(err error) (error, bool) {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgErr.Code == pgerrcode.UniqueViolation {
-		constraints := strings.Split(pgErr.ConstraintName, ",")
-
-		var fields []string
-
-		for _, constraint := range constraints {
-			field := getMappedConstraintFieldName(constraint)
-			fields = append(fields, field)
-		}
-
-		return &domain.ErrObjectUniqueConstraint{Fields: fields}, true
+		field := getMappedConstraintFieldName(pgErr.ConstraintName)
+		return &domain.ErrObjectUniqueConstraint{Fields: []string{field}}, true
 	}
 	return nil, false
 }
 
 func getMappedConstraintFieldName(constraintName string) string {
-	constraintFieldMap := map[string]string{
+	constraintToFieldMap := map[string]string{
 		"unique_username": "username",
 	}
-	if field, ok := constraintFieldMap[constraintName]; ok {
+	if field, ok := constraintToFieldMap[constraintName]; ok {
 		return field
 	}
 	return "unknown"

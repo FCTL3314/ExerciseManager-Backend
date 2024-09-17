@@ -26,7 +26,7 @@ type ErrObjectUniqueConstraint struct {
 
 func (e *ErrObjectUniqueConstraint) Error() string {
 	return fmt.Sprintf(
-		"Unique constraint violation on fields \"%s\". An object with values for these fields already exists.",
+		"Unique constraint violation on field(s) \"%s\". An object with values for these fields already exists.",
 		strings.Join(e.Fields, ","),
 	)
 }
