@@ -25,8 +25,7 @@ func (wr *WorkoutRepository) Get(filterParams *domain.FilterParams) (*domain.Wor
 	var workout domain.Workout
 	query := wr.db.Where(filterParams.Query, filterParams.Args...)
 	query = applyPreloadsForGORMQuery(query, wr.toPreload)
-	err := (query.First(&workout)).Error
-	if err != nil {
+	if err := (query.First(&workout)).Error; err != nil {
 		return nil, err
 	}
 

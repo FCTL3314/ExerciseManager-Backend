@@ -46,3 +46,7 @@ type UserRepository interface {
 type WorkoutRepository interface {
 	Repository[Workout]
 }
+
+type ExerciseRepository interface {
+	Repository[Exercise]
+}
