@@ -66,7 +66,25 @@ func (am *AccessManager) HasAccess(authenticatedUserID int64, resource interface
 	return policy.HasAccess(authenticatedUserID, resource)
 }
 
-func BuildDefaultAccessManager() *AccessManager {
+func BuildUserAccessManager() *AccessManager {
+	accessManager := NewAccessManager()
+	accessManager.RegisterPolicy(reflect.TypeOf(&domain.User{}), &UserAccessPolicy{})
+	return accessManager
+}
+
+func BuildWorkoutAccessManager() *AccessManager {
+	accessManager := NewAccessManager()
+	accessManager.RegisterPolicy(reflect.TypeOf(&domain.Workout{}), &WorkoutAccessPolicy{})
+	return accessManager
+}
+
+func BuildExerciseAccessManager() *AccessManager {
+	accessManager := NewAccessManager()
+	accessManager.RegisterPolicy(reflect.TypeOf(&domain.Exercise{}), &ExerciseAccessPolicy{})
+	return accessManager
+}
+
+func BuildAllEntitiesAccessManager() *AccessManager {
 	accessManager := NewAccessManager()
 	accessManager.RegisterPolicy(reflect.TypeOf(&domain.User{}), &UserAccessPolicy{})
 	accessManager.RegisterPolicy(reflect.TypeOf(&domain.Workout{}), &WorkoutAccessPolicy{})

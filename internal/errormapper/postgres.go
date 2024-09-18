@@ -20,7 +20,7 @@ func (m *PostgresErrUniqueViolationMapper) MapError(err error) (error, bool) {
 
 func getMappedConstraintFieldName(constraintName string) string {
 	constraintToFieldMap := map[string]string{
-		"unique_username": "username",
+		"users_username_key": "username",
 	}
 	if field, ok := constraintToFieldMap[constraintName]; ok {
 		return field

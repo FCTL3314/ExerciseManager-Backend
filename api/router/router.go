@@ -70,7 +70,7 @@ func registerUserRoutes(
 	usersRouter.Use(middleware.ErrorLoggerMiddleware(logger))
 
 	userRepository := repository.NewUserRepository(db)
-	accessManager := permission.BuildDefaultAccessManager()
+	accessManager := permission.BuildUserAccessManager()
 	passwordHasher := auth.NewBcryptPasswordHasher()
 	tokenManager := tokenutil.NewJWTTokenManager(
 		cfg.JWTAccessSecret,
@@ -108,7 +108,7 @@ func registerWorkoutRoutes(
 	workoutsRouter.Use(middleware.ErrorLoggerMiddleware(logger))
 
 	workoutRepository := repository.NewWorkoutRepository(db)
-	accessManager := permission.BuildDefaultAccessManager()
+	accessManager := permission.BuildWorkoutAccessManager()
 	tokenManager := tokenutil.NewJWTTokenManager(
 		cfg.JWTAccessSecret,
 		cfg.JWTRefreshSecret,
@@ -143,7 +143,7 @@ func registerExerciseRoutes(
 	exercisesRouter.Use(middleware.ErrorLoggerMiddleware(logger))
 
 	exerciseRepository := repository.NewExerciseRepository(db)
-	accessManager := permission.BuildDefaultAccessManager()
+	accessManager := permission.BuildExerciseAccessManager()
 	tokenManager := tokenutil.NewJWTTokenManager(
 		cfg.JWTAccessSecret,
 		cfg.JWTRefreshSecret,
