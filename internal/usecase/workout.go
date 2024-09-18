@@ -24,71 +24,71 @@ func NewWorkoutUsecase(
 	}
 }
 
-func (ur *WorkoutUsecase) GetById(id int64) (*domain.Workout, error) {
-	workout, err := ur.workoutRepository.GetById(id)
+func (wu *WorkoutUsecase) GetById(id int64) (*domain.Workout, error) {
+	workout, err := wu.workoutRepository.GetById(id)
 	if err != nil {
-		return nil, ur.errorMapper.MapError(err)
+		return nil, wu.errorMapper.MapError(err)
 	}
 
 	return workout, nil
 }
 
-func (ur *WorkoutUsecase) Get(params *domain.FilterParams) (*domain.Workout, error) {
-	workout, err := ur.workoutRepository.Get(params)
+func (wu *WorkoutUsecase) Get(params *domain.FilterParams) (*domain.Workout, error) {
+	workout, err := wu.workoutRepository.Get(params)
 	if err != nil {
-		return nil, ur.errorMapper.MapError(err)
+		return nil, wu.errorMapper.MapError(err)
 	}
 	return workout, nil
 }
 
-func (ur *WorkoutUsecase) List(params *domain.Params) (*domain.PaginatedResult[*domain.Workout], error) {
-	workouts, err := ur.workoutRepository.Fetch(params)
+func (wu *WorkoutUsecase) List(params *domain.Params) (*domain.PaginatedResult[*domain.Workout], error) {
+	workouts, err := wu.workoutRepository.Fetch(params)
 	if err != nil {
-		return nil, ur.errorMapper.MapError(err)
+		return nil, wu.errorMapper.MapError(err)
 	}
 
-	count, err := ur.workoutRepository.Count(&domain.FilterParams{})
+	count, err := wu.workoutRepository.Count(&domain.FilterParams{})
 	if err != nil {
-		return nil, ur.errorMapper.MapError(err)
+		return nil, wu.errorMapper.MapError(err)
 	}
 
 	return &domain.PaginatedResult[*domain.Workout]{Results: workouts, Count: count}, nil
 }
 
-func (ur *WorkoutUsecase) Create(authUserId int64, createWorkoutRequest *domain.CreateWorkoutRequest) (*domain.Workout, error) {
+func (wu *WorkoutUsecase) Create(authUserId int64, createWorkoutRequest *domain.CreateWorkoutRequest) (*domain.Workout, error) {
 	workout := domain.NewWorkoutFromCreateRequest(createWorkoutRequest)
 	workout.UserID = authUserId
-	return ur.workoutRepository.Create(workout)
+	return wu.workoutRepository.Create(workout)
 }
 
-func (ur *WorkoutUsecase) Update(authUserId int64, id int64, updateWorkoutRequest *domain.UpdateWorkoutRequest) (*domain.Workout, error) {
-	workoutToUpdate, err := ur.workoutRepository.GetById(id)
+func (wu *WorkoutUsecase) Update(authUserId int64, id int64, updateWorkoutRequest *domain.UpdateWorkoutRequest) (*domain.Workout, error) {
+	workoutToUpdate, err := wu.workoutRepository.GetById(id)
 	if err != nil {
-		return nil, ur.errorMapper.MapError(err)
+		return nil, wu.errorMapper.MapError(err)
 	}
 
-	if !ur.accessManager.HasAccess(authUserId, workoutToUpdate) {
+	if !wu.accessManager.HasAccess(authUserId, workoutToUpdate) {
 		return nil, domain.ErrAccessDenied
 	}
 
 	workoutToUpdate.ApplyUpdate(updateWorkoutRequest)
 
-	updatedWorkout, err := ur.workoutRepository.Update(workoutToUpdate)
+	updatedWorkout, err := wu.workoutRepository.Update(workoutToUpdate)
 	if err != nil {
-		return nil, ur.errorMapper.MapError(err)
+		return nil, wu.errorMapper.MapError(err)
 	}
 	return updatedWorkout, nil
 }
 
-func (ur *WorkoutUsecase) Delete(authUserId int64, id int64) error {
-	workout, err := ur.workoutRepository.GetById(id)
+func (wu *WorkoutUsecase) Delete(authUserId int64, id int64) error {
+	workout, err := wu.workoutRepository.GetById(id)
 	if err != nil {
-		return ur.errorMapper.MapError(err)
+		return wu.errorMapper.MapError(err)
 	}
 
-	if !ur.accessManager.HasAccess(authUserId, workout) {
+	if !wu.accessManager.HasAccess(authUserId, workout) {
 		return domain.ErrAccessDenied
 	}
 
-	return ur.workoutRepository.Delete(id)
+	return wu.workoutRepository.Delete(id)
 }
