@@ -57,6 +57,7 @@ func RegisterRoutes(
 
 	registerUserRoutes(v1Router, db, cfg, *loggerGroup.User)
 	registerWorkoutRoutes(v1Router, db, cfg, *loggerGroup.Workout)
+	registerExerciseRoutes(v1Router, db, cfg, *loggerGroup.Exercise)
 }
 
 func registerUserRoutes(
@@ -130,4 +131,39 @@ func registerWorkoutRoutes(
 
 	workoutRouter := NewWorkoutRouter(workoutsRouter, tokenManager, workoutController, cfg)
 	workoutRouter.RegisterAll()
+}
+
+func registerExerciseRoutes(
+	baseRouter *gin.RouterGroup,
+	db *gorm.DB,
+	cfg *bootstrap.Config,
+	logger bootstrap.Logger,
+) {
+	exercisesRouter := baseRouter.Group("/exercises/")
+	exercisesRouter.Use(middleware.ErrorLoggerMiddleware(logger))
+
+	exerciseRepository := repository.NewExerciseRepository(db)
+	accessManager := permission.BuildDefaultAccessManager()
+	tokenManager := tokenutil.NewJWTTokenManager(
+		cfg.JWTAccessSecret,
+		cfg.JWTRefreshSecret,
+		cfg.JWTAccessExpire,
+		cfg.JWTRefreshExpire,
+	)
+	errorMapper := errormapper.BuildAllErrorsMapperChain()
+	exerciseUsecase := usecase.NewExerciseUsecase(
+		exerciseRepository,
+		accessManager,
+		errorMapper,
+	)
+
+	errorHandler := controller.DefaultErrorHandler()
+	exerciseController := controller.NewExerciseController(
+		exerciseUsecase,
+		errorHandler,
+		logger,
+	)
+
+	exerciseRouter := NewExerciseRouter(exercisesRouter, tokenManager, exerciseController, cfg)
+	exerciseRouter.RegisterAll()
 }

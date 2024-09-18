@@ -69,10 +69,12 @@ func (app *Application) initGin() {
 func (app *Application) initLoggerGroup() {
 	userLogger := InitUserLogger()
 	workoutLogger := InitWorkoutLogger()
+	exerciseLogger := InitExerciseLogger()
 
 	loggerGroup := NewLoggerGroup(
 		&userLogger,
 		&workoutLogger,
+		&exerciseLogger,
 	)
 	app.LoggerGroup = loggerGroup
 }

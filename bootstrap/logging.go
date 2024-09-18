@@ -9,12 +9,15 @@ import (
 )
 
 const (
+	ControllerLogsFileName = "controller.json"
+
 	BaseLogsDir    = "logs/"
 	BaseUserDir    = BaseLogsDir + "users/"
 	BaseWorkoutDir = BaseLogsDir + "users/"
 
-	UserControllersLoggingPath    = BaseUserDir + "controller.json"
-	WorkoutControllersLoggingPath = BaseWorkoutDir + "controller.json"
+	UserControllersLoggingPath     = BaseUserDir + ControllerLogsFileName
+	WorkoutControllersLoggingPath  = BaseWorkoutDir + ControllerLogsFileName
+	ExerciseControllersLoggingPath = BaseWorkoutDir + ControllerLogsFileName
 )
 
 type Logger interface {
@@ -47,17 +50,20 @@ func (sl *SlogLogger) Error(msg string, args ...any) {
 }
 
 type LoggerGroup struct {
-	User    *Logger
-	Workout *Logger
+	User     *Logger
+	Workout  *Logger
+	Exercise *Logger
 }
 
 func NewLoggerGroup(
 	userLogger *Logger,
 	workoutLogger *Logger,
+	exerciseLogger *Logger,
 ) *LoggerGroup {
 	return &LoggerGroup{
-		User:    userLogger,
-		Workout: workoutLogger,
+		User:     userLogger,
+		Workout:  workoutLogger,
+		Exercise: exerciseLogger,
 	}
 }
 
@@ -85,5 +91,6 @@ func initLogger(logFilePath string) Logger {
 	}
 }
 
-func InitUserLogger() Logger    { return initLogger(UserControllersLoggingPath) }
-func InitWorkoutLogger() Logger { return initLogger(WorkoutControllersLoggingPath) }
+func InitUserLogger() Logger     { return initLogger(UserControllersLoggingPath) }
+func InitWorkoutLogger() Logger  { return initLogger(WorkoutControllersLoggingPath) }
+func InitExerciseLogger() Logger { return initLogger(ExerciseControllersLoggingPath) }
