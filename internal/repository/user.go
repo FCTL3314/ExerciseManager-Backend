@@ -20,9 +20,9 @@ func (ur *UserRepository) GetById(id int64) (*domain.User, error) {
 	})
 }
 
-func (ur *UserRepository) Get(params *domain.FilterParams) (*domain.User, error) {
+func (ur *UserRepository) Get(filterParams *domain.FilterParams) (*domain.User, error) {
 	var user domain.User
-	if err := (ur.db.Where(params.Query, params.Args...).First(&user)).Error; err != nil {
+	if err := (ur.db.Where(filterParams.Query, filterParams.Args...).First(&user)).Error; err != nil {
 		return nil, err
 	}
 

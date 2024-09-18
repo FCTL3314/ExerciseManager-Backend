@@ -5,7 +5,7 @@ type GetterById[T any] interface {
 }
 
 type Getter[T any] interface {
-	Get(params *FilterParams) (*T, error)
+	Get(filterParams *FilterParams) (*T, error)
 }
 
 type Fetcher[T any] interface {
