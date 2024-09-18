@@ -19,7 +19,6 @@ type ResponseWorkout struct {
 	ID          int64         `json:"id"`
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
-	UserID      int64         `json:"user_id"`
 	User        *ResponseUser `json:"user"`
 	Exercises   []*Exercise   `json:"exercises"`
 	CreatedAt   time.Time     `json:"created_at"`
@@ -44,16 +43,20 @@ func NewWorkoutFromCreateRequest(req *CreateWorkoutRequest) *Workout {
 }
 
 func (w *Workout) ToResponseWorkout() *ResponseWorkout {
-	return &ResponseWorkout{
+	rw := &ResponseWorkout{
 		ID:          w.ID,
 		Name:        w.Name,
 		Description: w.Description,
-		UserID:      w.UserID,
-		User:        w.User.ToResponseUser(),
 		Exercises:   w.Exercises,
 		CreatedAt:   w.CreatedAt,
 		UpdatedAt:   w.UpdatedAt,
 	}
+
+	if w.User != nil {
+		rw.User = w.User.ToResponseUser()
+	}
+
+	return rw
 }
 
 func (w *Workout) ApplyUpdate(req *UpdateWorkoutRequest) {
@@ -66,9 +69,9 @@ func (w *Workout) ApplyUpdate(req *UpdateWorkoutRequest) {
 	}
 }
 
-func ToResponseWorkouts(users []*Workout) []*ResponseWorkout {
-	responseWorkouts := make([]*ResponseWorkout, len(users))
-	for i, workout := range users {
+func ToResponseWorkouts(workouts []*Workout) []*ResponseWorkout {
+	responseWorkouts := make([]*ResponseWorkout, len(workouts))
+	for i, workout := range workouts {
 		responseWorkouts[i] = workout.ToResponseWorkout()
 	}
 	return responseWorkouts

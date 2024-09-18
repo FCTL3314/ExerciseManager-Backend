@@ -27,7 +27,6 @@ type ResponseExercise struct {
 	Name        string             `json:"name"`
 	Description string             `json:"description"`
 	Duration    time.Duration      `json:"duration"`
-	UserID      int64              `json:"user_id"`
 	User        *ResponseUser      `json:"user"`
 	Workouts    []*ResponseWorkout `json:"workouts"`
 }
@@ -53,15 +52,18 @@ func NewExerciseFromCreateRequest(req *CreateExerciseRequest) *Exercise {
 }
 
 func (e *Exercise) ToResponseExercise() *ResponseExercise {
-	return &ResponseExercise{
+	re := &ResponseExercise{
 		ID:          e.ID,
 		Name:        e.Name,
 		Description: e.Description,
 		Duration:    e.Duration,
-		UserID:      e.UserID,
-		User:        e.User.ToResponseUser(),
 		Workouts:    ToResponseWorkouts(e.Workouts),
 	}
+
+	if e.User != nil {
+		re.User = e.User.ToResponseUser()
+	}
+	return re
 }
 
 func (e *Exercise) ApplyUpdate(req *UpdateExerciseRequest) {
@@ -78,10 +80,10 @@ func (e *Exercise) ApplyUpdate(req *UpdateExerciseRequest) {
 	}
 }
 
-func ToResponseExercises(users []*Exercise) []*ResponseExercise {
-	responseExercises := make([]*ResponseExercise, len(users))
-	for i, workout := range users {
-		responseExercises[i] = workout.ToResponseExercise()
+func ToResponseExercises(exercises []*Exercise) []*ResponseExercise {
+	responseExercises := make([]*ResponseExercise, len(exercises))
+	for i, exercise := range exercises {
+		responseExercises[i] = exercise.ToResponseExercise()
 	}
 	return responseExercises
 }
