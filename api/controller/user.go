@@ -143,13 +143,13 @@ func (uc *DefaultUserController) Update(c *gin.Context) {
 		return
 	}
 
-	authUserId := c.GetInt64(string(UserIDContextKey))
-
 	var user domain.UpdateUserRequest
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
 		return
 	}
+
+	authUserId := c.GetInt64(string(UserIDContextKey))
 
 	updatedUser, err := uc.usecase.Update(authUserId, id, &user)
 	if err != nil {

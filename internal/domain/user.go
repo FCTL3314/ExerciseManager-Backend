@@ -9,6 +9,12 @@ type User struct {
 	CreatedAt time.Time
 }
 
+type ResponseUser struct {
+	ID        int64     `json:"id"`
+	Username  string    `json:"username"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type CreateUserRequest struct {
 	Username string `json:"username" binding:"required,min=4,max=16"`
 	Password string `json:"password" binding:"required,min=6,max=128"`
@@ -21,12 +27,6 @@ type UpdateUserRequest struct {
 type LoginUserRequest struct {
 	Username string `json:"username" binding:"required,min=4,max=16"`
 	Password string `json:"password" binding:"required,min=6,max=128"`
-}
-
-type ResponseUser struct {
-	ID        int64     `json:"id"`
-	Username  string    `json:"username"`
-	CreatedAt time.Time `json:"created_at"`
 }
 
 type RefreshTokenRequest struct {

@@ -55,8 +55,9 @@ func (ur *WorkoutUsecase) List(params *domain.Params) (*domain.PaginatedResult[*
 	return &domain.PaginatedResult[*domain.Workout]{Results: workouts, Count: count}, nil
 }
 
-func (ur *WorkoutUsecase) Create(createWorkoutRequest *domain.CreateWorkoutRequest) (*domain.Workout, error) {
+func (ur *WorkoutUsecase) Create(authUserId int64, createWorkoutRequest *domain.CreateWorkoutRequest) (*domain.Workout, error) {
 	workout := domain.NewWorkoutFromCreateRequest(createWorkoutRequest)
+	workout.UserID = authUserId
 	return ur.workoutRepository.Create(workout)
 }
 
