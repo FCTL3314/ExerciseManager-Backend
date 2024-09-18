@@ -83,11 +83,3 @@ func BuildExerciseAccessManager() *AccessManager {
 	accessManager.RegisterPolicy(reflect.TypeOf(&domain.Exercise{}), &ExerciseAccessPolicy{})
 	return accessManager
 }
-
-func BuildAllEntitiesAccessManager() *AccessManager {
-	accessManager := NewAccessManager()
-	accessManager.RegisterPolicy(reflect.TypeOf(&domain.User{}), &UserAccessPolicy{})
-	accessManager.RegisterPolicy(reflect.TypeOf(&domain.Workout{}), &WorkoutAccessPolicy{})
-	accessManager.RegisterPolicy(reflect.TypeOf(&domain.Exercise{}), &ExerciseAccessPolicy{})
-	return accessManager
-}
