@@ -22,10 +22,10 @@ func (ur *UserRepository) GetById(id int64) (*domain.User, error) {
 
 func (ur *UserRepository) Get(params *domain.FilterParams) (*domain.User, error) {
 	var user domain.User
-	query := ur.db.Where(params.Query, params.Args...).First(&user)
-	if query.Error != nil {
-		return nil, query.Error
+	if err := (ur.db.Where(params.Query, params.Args...).First(&user)).Error; err != nil {
+		return nil, err
 	}
+
 	return &user, nil
 }
 
@@ -43,41 +43,40 @@ func (ur *UserRepository) Fetch(params *domain.Params) ([]*domain.User, error) {
 	if params.Pagination.Limit != 0 {
 		query = query.Limit(params.Pagination.Limit).Offset(params.Pagination.Offset)
 	}
-	query = query.Find(&users)
-	if query.Error != nil {
-		return nil, query.Error
+	if err := (query.Find(&users)).Error; err != nil {
+		return nil, err
 	}
+
 	return users, nil
 }
 
 func (ur *UserRepository) Create(user *domain.User) (*domain.User, error) {
-	query := ur.db.Save(&user)
-	if query.Error != nil {
-		return nil, query.Error
+	if err := (ur.db.Save(&user)).Error; err != nil {
+		return nil, err
 	}
+
 	return user, nil
 }
 
 func (ur *UserRepository) Update(user *domain.User) (*domain.User, error) {
-	query := ur.db.Save(&user)
-	if query.Error != nil {
-		return nil, query.Error
+	if err := (ur.db.Save(&user)).Error; err != nil {
+		return nil, err
 	}
+
 	return user, nil
 }
 
 func (ur *UserRepository) Delete(id int64) error {
-	if query := ur.db.Where("id = ?", id).Delete(&domain.User{}); query.Error != nil {
-		return query.Error
+	if err := (ur.db.Where("id = ?", id).Delete(&domain.User{})).Error; err != nil {
+		return err
 	}
 	return nil
 }
 
 func (ur *UserRepository) Count(params *domain.FilterParams) (int64, error) {
 	var count int64
-	query := ur.db.Model(&domain.User{}).Where(params.Query, params.Args...).Count(&count)
-	if query.Error != nil {
-		return 0, query.Error
+	if err := (ur.db.Model(&domain.User{}).Where(params.Query, params.Args...).Count(&count)).Error; err != nil {
+		return 0, err
 	}
 	return count, nil
 }

@@ -16,14 +16,14 @@ type Workout struct {
 }
 
 type ResponseWorkout struct {
-	ID          int64       `json:"id"`
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	UserID      int64       `json:"user_id"`
-	User        *User       `json:"user"`
-	Exercises   []*Exercise `json:"exercises"`
-	CreatedAt   time.Time   `json:"created_at"`
-	UpdatedAt   time.Time   `json:"updated_at"`
+	ID          int64         `json:"id"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	UserID      int64         `json:"user_id"`
+	User        *ResponseUser `json:"user"`
+	Exercises   []*Exercise   `json:"exercises"`
+	CreatedAt   time.Time     `json:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at"`
 }
 
 type CreateWorkoutRequest struct {
@@ -32,8 +32,8 @@ type CreateWorkoutRequest struct {
 }
 
 type UpdateWorkoutRequest struct {
-	Name        *string `json:"name" binding:"required,min=1,max=128"`
-	Description *string `json:"description" binding:"required,min=1,max=256"`
+	Name        *string `json:"name,omitempty" binding:"omitempty,min=1,max=128"`
+	Description *string `json:"description,omitempty" binding:"omitempty,min=1,max=256"`
 }
 
 func NewWorkoutFromCreateRequest(req *CreateWorkoutRequest) *Workout {
@@ -49,7 +49,7 @@ func (w *Workout) ToResponseWorkout() *ResponseWorkout {
 		Name:        w.Name,
 		Description: w.Description,
 		UserID:      w.UserID,
-		User:        w.User,
+		User:        w.User.ToResponseUser(),
 		Exercises:   w.Exercises,
 		CreatedAt:   w.CreatedAt,
 		UpdatedAt:   w.UpdatedAt,
