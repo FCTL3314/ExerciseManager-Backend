@@ -10,15 +10,15 @@ import (
 
 type UserRouter struct {
 	router         *gin.RouterGroup
-	tokenManager   tokenutil.IJWTTokenManager
-	userController controller.IUserController
+	tokenManager   tokenutil.JWTTokenManager
+	userController controller.UserController
 	cfg            *bootstrap.Config
 }
 
 func NewUserRouter(
 	router *gin.RouterGroup,
-	tokenManager *tokenutil.JWTTokenManager,
-	userController *controller.UserController,
+	tokenManager *tokenutil.DefaultJWTTokenManager,
+	userController *controller.DefaultUserController,
 	cfg *bootstrap.Config,
 ) *UserRouter {
 	return &UserRouter{router, tokenManager, userController, cfg}

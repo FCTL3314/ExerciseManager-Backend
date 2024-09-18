@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func JwtAuthMiddleware(tokenManager tokenutil.IJWTTokenManager) gin.HandlerFunc {
+func JwtAuthMiddleware(tokenManager tokenutil.JWTTokenManager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
 		tokenParts := strings.Split(authHeader, " ")

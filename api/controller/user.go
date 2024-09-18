@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-type UserController struct {
+type DefaultUserController struct {
 	usecase      domain.UserUsecase
 	errorHandler *ErrorHandler
 	Logger       bootstrap.Logger
@@ -17,15 +17,15 @@ func NewUserController(
 	usecase domain.UserUsecase,
 	errorHandler *ErrorHandler,
 	logger bootstrap.Logger,
-) *UserController {
-	return &UserController{
+) *DefaultUserController {
+	return &DefaultUserController{
 		usecase:      usecase,
 		errorHandler: errorHandler,
 		Logger:       logger,
 	}
 }
 
-func (uc *UserController) Me(c *gin.Context) {
+func (uc *DefaultUserController) Me(c *gin.Context) {
 	authUserId := c.GetInt64(string(UserIDContextKey))
 
 	user, err := uc.usecase.GetById(authUserId)
@@ -39,7 +39,7 @@ func (uc *UserController) Me(c *gin.Context) {
 	c.JSON(http.StatusOK, responseUser)
 }
 
-func (uc *UserController) Get(c *gin.Context) {
+func (uc *DefaultUserController) Get(c *gin.Context) {
 	id, err := getParamAsInt64(c, "id")
 	if err != nil {
 		uc.errorHandler.Handle(c, err)
@@ -57,7 +57,7 @@ func (uc *UserController) Get(c *gin.Context) {
 	c.JSON(http.StatusOK, responseUser)
 }
 
-func (uc *UserController) List(c *gin.Context) {
+func (uc *DefaultUserController) List(c *gin.Context) {
 	paginationParams, err := getUserPaginationParams(c)
 	if err != nil {
 		uc.errorHandler.Handle(c, err)
@@ -86,7 +86,7 @@ func (uc *UserController) List(c *gin.Context) {
 	c.JSON(http.StatusOK, paginatedResponse)
 }
 
-func (uc *UserController) Create(c *gin.Context) {
+func (uc *DefaultUserController) Create(c *gin.Context) {
 	var user domain.CreateUserRequest
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
@@ -104,7 +104,7 @@ func (uc *UserController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, responseUser)
 }
 
-func (uc *UserController) Login(c *gin.Context) {
+func (uc *DefaultUserController) Login(c *gin.Context) {
 	var user domain.LoginUserRequest
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
@@ -120,7 +120,7 @@ func (uc *UserController) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, loginResponse)
 }
 
-func (uc *UserController) RefreshTokens(c *gin.Context) {
+func (uc *DefaultUserController) RefreshTokens(c *gin.Context) {
 	var refreshTokenRequest domain.RefreshTokenRequest
 	if err := c.ShouldBindJSON(&refreshTokenRequest); err != nil {
 		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
@@ -136,7 +136,7 @@ func (uc *UserController) RefreshTokens(c *gin.Context) {
 	c.JSON(http.StatusOK, refreshTokenResponse)
 }
 
-func (uc *UserController) Update(c *gin.Context) {
+func (uc *DefaultUserController) Update(c *gin.Context) {
 	id, err := getParamAsInt64(c, "id")
 	if err != nil {
 		uc.errorHandler.Handle(c, err)
@@ -162,7 +162,7 @@ func (uc *UserController) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, responseUser)
 }
 
-func (uc *UserController) Delete(c *gin.Context) {
+func (uc *DefaultUserController) Delete(c *gin.Context) {
 	id, err := getParamAsInt64(c, "id")
 	if err != nil {
 		uc.errorHandler.Handle(c, err)

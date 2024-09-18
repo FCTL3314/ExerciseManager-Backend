@@ -13,7 +13,7 @@ type UserUsecase struct {
 	userRepository domain.UserRepository
 	accessManager  permission.AccessPolicy
 	passwordHasher auth.PasswordHasher
-	tokenManager   tokenutil.IJWTTokenManager
+	tokenManager   tokenutil.JWTTokenManager
 	errorMapper    errormapper.Chain
 	cfg            *bootstrap.Config
 }
@@ -22,7 +22,7 @@ func NewUserUsecase(
 	userRepository domain.UserRepository,
 	accessManager permission.AccessPolicy,
 	passwordHasher auth.PasswordHasher,
-	tokenManager tokenutil.IJWTTokenManager,
+	tokenManager tokenutil.JWTTokenManager,
 	errorMapper errormapper.Chain,
 ) *UserUsecase {
 	return &UserUsecase{

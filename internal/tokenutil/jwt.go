@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type IJWTTokenManager interface {
+type JWTTokenManager interface {
 	CreateUserAccessToken(user *domain.User) (string, error)
 	CreateUserRefreshToken(user *domain.User) (string, error)
 	IsAccessTokenValid(tokenStr string) (bool, error)
@@ -17,15 +17,15 @@ type IJWTTokenManager interface {
 	ExtractUserIDFromRefreshToken(tokenStr string) (int64, error)
 }
 
-type JWTTokenManager struct {
+type DefaultJWTTokenManager struct {
 	AccessSecret  string
 	RefreshSecret string
 	AccessExpiry  time.Duration
 	RefreshExpiry time.Duration
 }
 
-func NewJWTTokenManager(accessSecret, refreshSecret string, accessExpiry, refreshExpiry time.Duration) *JWTTokenManager {
-	return &JWTTokenManager{
+func NewJWTTokenManager(accessSecret, refreshSecret string, accessExpiry, refreshExpiry time.Duration) *DefaultJWTTokenManager {
+	return &DefaultJWTTokenManager{
 		AccessSecret:  accessSecret,
 		RefreshSecret: refreshSecret,
 		AccessExpiry:  accessExpiry,
@@ -33,23 +33,23 @@ func NewJWTTokenManager(accessSecret, refreshSecret string, accessExpiry, refres
 	}
 }
 
-func (tm *JWTTokenManager) CreateUserAccessToken(user *domain.User) (string, error) {
+func (tm *DefaultJWTTokenManager) CreateUserAccessToken(user *domain.User) (string, error) {
 	return tm.CreateAccessToken(user.ID)
 }
 
-func (tm *JWTTokenManager) CreateUserRefreshToken(user *domain.User) (string, error) {
+func (tm *DefaultJWTTokenManager) CreateUserRefreshToken(user *domain.User) (string, error) {
 	return tm.CreateRefreshToken(user.ID)
 }
 
-func (tm *JWTTokenManager) IsAccessTokenValid(tokenStr string) (bool, error) {
+func (tm *DefaultJWTTokenManager) IsAccessTokenValid(tokenStr string) (bool, error) {
 	return tm.isTokenValid(tokenStr, tm.AccessSecret)
 }
 
-func (tm *JWTTokenManager) IsRefreshTokenValid(tokenStr string) (bool, error) {
+func (tm *DefaultJWTTokenManager) IsRefreshTokenValid(tokenStr string) (bool, error) {
 	return tm.isTokenValid(tokenStr, tm.RefreshSecret)
 }
 
-func (tm *JWTTokenManager) isTokenValid(tokenStr string, secret string) (bool, error) {
+func (tm *DefaultJWTTokenManager) isTokenValid(tokenStr string, secret string) (bool, error) {
 	claims := &jwt.RegisteredClaims{}
 	token, err := tm.parseToken(tokenStr, secret, claims)
 	if err != nil {
@@ -58,15 +58,15 @@ func (tm *JWTTokenManager) isTokenValid(tokenStr string, secret string) (bool, e
 	return token.Valid, nil
 }
 
-func (tm *JWTTokenManager) ExtractUserIDFromAccessToken(tokenStr string) (int64, error) {
+func (tm *DefaultJWTTokenManager) ExtractUserIDFromAccessToken(tokenStr string) (int64, error) {
 	return tm.ExtractUserIDFromToken(tokenStr, tm.AccessSecret)
 }
 
-func (tm *JWTTokenManager) ExtractUserIDFromRefreshToken(tokenStr string) (int64, error) {
+func (tm *DefaultJWTTokenManager) ExtractUserIDFromRefreshToken(tokenStr string) (int64, error) {
 	return tm.ExtractUserIDFromToken(tokenStr, tm.RefreshSecret)
 }
 
-func (tm *JWTTokenManager) ExtractUserIDFromToken(tokenStr string, secret string) (int64, error) {
+func (tm *DefaultJWTTokenManager) ExtractUserIDFromToken(tokenStr string, secret string) (int64, error) {
 	idString, err := tm.extractIdFromToken(tokenStr, secret)
 	if err != nil {
 		return 0, err
@@ -80,7 +80,7 @@ func (tm *JWTTokenManager) ExtractUserIDFromToken(tokenStr string, secret string
 	return id, nil
 }
 
-func (tm *JWTTokenManager) extractIdFromToken(tokenStr string, secret string) (string, error) {
+func (tm *DefaultJWTTokenManager) extractIdFromToken(tokenStr string, secret string) (string, error) {
 	claims := &jwt.RegisteredClaims{}
 	token, err := tm.parseToken(tokenStr, secret, claims)
 	if err != nil {
@@ -94,15 +94,15 @@ func (tm *JWTTokenManager) extractIdFromToken(tokenStr string, secret string) (s
 	return claims.ID, nil
 }
 
-func (tm *JWTTokenManager) CreateAccessToken(id int64) (string, error) {
+func (tm *DefaultJWTTokenManager) CreateAccessToken(id int64) (string, error) {
 	return tm.createToken(id, tm.AccessSecret, tm.AccessExpiry)
 }
 
-func (tm *JWTTokenManager) CreateRefreshToken(id int64) (string, error) {
+func (tm *DefaultJWTTokenManager) CreateRefreshToken(id int64) (string, error) {
 	return tm.createToken(id, tm.RefreshSecret, tm.RefreshExpiry)
 }
 
-func (tm *JWTTokenManager) createToken(id int64, secret string, expiry time.Duration) (string, error) {
+func (tm *DefaultJWTTokenManager) createToken(id int64, secret string, expiry time.Duration) (string, error) {
 	exp := time.Now().Add(expiry)
 	claims := &jwt.RegisteredClaims{
 		ID:        strconv.FormatInt(id, 10),
@@ -119,7 +119,7 @@ func (tm *JWTTokenManager) createToken(id int64, secret string, expiry time.Dura
 	return signedToken, nil
 }
 
-func (tm *JWTTokenManager) parseToken(tokenStr, secret string, claims jwt.Claims) (*jwt.Token, error) {
+func (tm *DefaultJWTTokenManager) parseToken(tokenStr, secret string, claims jwt.Claims) (*jwt.Token, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
