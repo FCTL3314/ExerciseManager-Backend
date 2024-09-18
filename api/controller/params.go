@@ -49,3 +49,7 @@ func getUserPaginationParams(c *gin.Context) (domain.PaginationParams, error) {
 func getWorkoutPaginationParams(c *gin.Context) (domain.PaginationParams, error) {
 	return getPaginationParams(c, domain.MaxWorkoutPaginationLimit)
 }
+
+func getExercisePaginationParams(c *gin.Context) (domain.PaginationParams, error) {
+	return getPaginationParams(c, domain.MaxExercisePaginationLimit)
+}
