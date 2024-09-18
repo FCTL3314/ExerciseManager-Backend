@@ -33,6 +33,16 @@ func (wa *WorkoutAccessPolicy) HasAccess(authenticatedUserID int64, resource int
 	return authenticatedUserID == targetWorkout.UserID
 }
 
+type ExerciseAccessPolicy struct{}
+
+func (wa *ExerciseAccessPolicy) HasAccess(authenticatedUserID int64, resource interface{}) bool {
+	targetExercise, ok := resource.(*domain.Exercise)
+	if !ok {
+		return false
+	}
+	return authenticatedUserID == targetExercise.UserID
+}
+
 type AccessManager struct {
 	policies map[reflect.Type]AccessPolicy
 }
@@ -60,5 +70,6 @@ func BuildDefaultAccessManager() *AccessManager {
 	accessManager := NewAccessManager()
 	accessManager.RegisterPolicy(reflect.TypeOf(&domain.User{}), &UserAccessPolicy{})
 	accessManager.RegisterPolicy(reflect.TypeOf(&domain.Workout{}), &WorkoutAccessPolicy{})
+	accessManager.RegisterPolicy(reflect.TypeOf(&domain.Exercise{}), &ExerciseAccessPolicy{})
 	return accessManager
 }

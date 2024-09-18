@@ -8,9 +8,9 @@ type Exercise struct {
 	ID          int64
 	Name        string
 	Description string
+	Duration    time.Duration
 	UserID      int64
 	User        *User
-	Duration    time.Duration
 	Workouts    []*Workout `gorm:"many2many:workout_exercises;"`
 }
 
@@ -26,9 +26,9 @@ type ResponseExercise struct {
 	ID          int64              `json:"id"`
 	Name        string             `json:"name"`
 	Description string             `json:"description"`
-	UserID      int64              `json:"user_id"`
-	User        *User              `json:"user"`
 	Duration    time.Duration      `json:"duration"`
+	UserID      int64              `json:"user_id"`
+	User        *ResponseUser      `json:"user"`
 	Workouts    []*ResponseWorkout `json:"workouts"`
 }
 
@@ -58,6 +58,8 @@ func (e *Exercise) ToResponseExercise() *ResponseExercise {
 		Name:        e.Name,
 		Description: e.Description,
 		Duration:    e.Duration,
+		UserID:      e.UserID,
+		User:        e.User.ToResponseUser(),
 		Workouts:    ToResponseWorkouts(e.Workouts),
 	}
 }

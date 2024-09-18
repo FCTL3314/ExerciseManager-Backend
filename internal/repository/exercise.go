@@ -11,7 +11,7 @@ type ExerciseRepository struct {
 }
 
 func NewExerciseRepository(db *gorm.DB) *ExerciseRepository {
-	return &ExerciseRepository{db: db, toPreload: []string{"Workouts"}}
+	return &ExerciseRepository{db: db, toPreload: []string{"User", "Workouts"}}
 }
 
 func (er *ExerciseRepository) GetById(id int64) (*domain.Exercise, error) {
