@@ -11,7 +11,7 @@ import (
 type WorkoutRouter struct {
 	router            *gin.RouterGroup
 	tokenManager      tokenutil.JWTTokenManager
-	workoutController controller.Controller
+	workoutController controller.WorkoutController
 	cfg               *bootstrap.Config
 }
 
@@ -28,6 +28,8 @@ func (wr *WorkoutRouter) RegisterAll() {
 	wr.RegisterGet()
 	wr.RegisterList()
 	wr.RegisterCreate()
+	wr.RegisterAddExercise()
+	wr.RegisterRemoveExercise()
 	wr.RegisterUpdate()
 	wr.RegisterDelete()
 }
@@ -42,6 +44,14 @@ func (wr *WorkoutRouter) RegisterList() {
 
 func (wr *WorkoutRouter) RegisterCreate() {
 	wr.router.POST("", middleware.JwtAuthMiddleware(wr.tokenManager), wr.workoutController.Create)
+}
+
+func (wr *WorkoutRouter) RegisterAddExercise() {
+	wr.router.POST("/:id/exercises/add", middleware.JwtAuthMiddleware(wr.tokenManager), wr.workoutController.AddExercise)
+}
+
+func (wr *WorkoutRouter) RegisterRemoveExercise() {
+	wr.router.DELETE("/:id/exercises/remove/:exerciseId", middleware.JwtAuthMiddleware(wr.tokenManager), wr.workoutController.RemoveExercise)
 }
 
 func (wr *WorkoutRouter) RegisterUpdate() {

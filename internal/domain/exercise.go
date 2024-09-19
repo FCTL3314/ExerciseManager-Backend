@@ -14,14 +14,6 @@ type Exercise struct {
 	Workouts    []*Workout `gorm:"many2many:workout_exercises;"`
 }
 
-type WorkoutExercises struct {
-	WorkoutID  int64
-	Workout    *Workout
-	ExerciseID int64
-	Exercise   *Exercise
-	BreakTime  time.Duration
-}
-
 type ResponseExercise struct {
 	ID          int64              `json:"id"`
 	Name        string             `json:"name"`

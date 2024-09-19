@@ -7,8 +7,8 @@ type UserUsecase interface {
 	Create(createUserRequest *CreateUserRequest) (*User, error)
 	Login(loginUserRequest *LoginUserRequest) (*TokensResponse, error)
 	RefreshTokens(refreshTokenRequest *RefreshTokenRequest) (*TokensResponse, error)
-	Update(authUserId int64, id int64, updateUser *UpdateUserRequest) (*User, error)
-	Delete(authUserId int64, id int64) error
+	Update(authUserId, id int64, updateUser *UpdateUserRequest) (*User, error)
+	Delete(authUserId, id int64) error
 }
 
 type WorkoutUsecase interface {
@@ -16,8 +16,10 @@ type WorkoutUsecase interface {
 	Get(params *FilterParams) (*Workout, error)
 	List(params *Params) (*PaginatedResult[*Workout], error)
 	Create(authUserId int64, createWorkoutRequest *CreateWorkoutRequest) (*Workout, error)
-	Update(authUserId int64, id int64, updateWorkoutRequest *UpdateWorkoutRequest) (*Workout, error)
-	Delete(authUserId int64, id int64) error
+	AddExercise(authUserId, workoutId int64, addExerciseRequest *AddExerciseToWorkoutRequest) (*Workout, error)
+	RemoveExercise(authUserId, workoutId, exerciseId int64) (*Workout, error)
+	Update(authUserId, id int64, updateWorkoutRequest *UpdateWorkoutRequest) (*Workout, error)
+	Delete(authUserId, id int64) error
 }
 
 type ExerciseUsecase interface {
@@ -25,6 +27,6 @@ type ExerciseUsecase interface {
 	Get(params *FilterParams) (*Exercise, error)
 	List(params *Params) (*PaginatedResult[*Exercise], error)
 	Create(authUserId int64, createExerciseRequest *CreateExerciseRequest) (*Exercise, error)
-	Update(authUserId int64, id int64, updateExerciseRequest *UpdateExerciseRequest) (*Exercise, error)
-	Delete(authUserId int64, id int64) error
+	Update(authUserId, id int64, updateExerciseRequest *UpdateExerciseRequest) (*Exercise, error)
+	Delete(authUserId, id int64) error
 }

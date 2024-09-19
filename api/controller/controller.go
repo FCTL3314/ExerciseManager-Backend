@@ -11,8 +11,14 @@ type Controller interface {
 }
 
 type UserController interface {
+	Controller
 	Me(c *gin.Context)
 	Login(c *gin.Context)
 	RefreshTokens(c *gin.Context)
+}
+
+type WorkoutController interface {
 	Controller
+	AddExercise(c *gin.Context)
+	RemoveExercise(c *gin.Context)
 }

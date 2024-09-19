@@ -93,6 +93,57 @@ func (wc *DefaultWorkoutController) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, responseWorkout)
 }
 
+func (wc *DefaultWorkoutController) AddExercise(c *gin.Context) {
+	workoutId, err := getParamAsInt64(c, "id")
+	if err != nil {
+		wc.errorHandler.Handle(c, err)
+		return
+	}
+
+	var addExerciseRequest domain.AddExerciseToWorkoutRequest
+	if err := c.ShouldBindJSON(&addExerciseRequest); err != nil {
+		c.JSON(http.StatusBadRequest, domain.NewValidationErrorResponse(err.Error()))
+		return
+	}
+
+	authUserId := c.GetInt64(string(UserIDContextKey))
+
+	workout, err := wc.usecase.AddExercise(authUserId, workoutId, &addExerciseRequest)
+	if err != nil {
+		wc.errorHandler.Handle(c, err)
+		return
+	}
+
+	responseWorkout := workout.ToResponseWorkout()
+
+	c.JSON(http.StatusCreated, responseWorkout)
+}
+
+func (wc *DefaultWorkoutController) RemoveExercise(c *gin.Context) {
+	workoutId, err := getParamAsInt64(c, "id")
+	if err != nil {
+		wc.errorHandler.Handle(c, err)
+		return
+	}
+	exerciseId, err := getParamAsInt64(c, "exerciseId")
+	if err != nil {
+		wc.errorHandler.Handle(c, err)
+		return
+	}
+
+	authUserId := c.GetInt64(string(UserIDContextKey))
+
+	workout, err := wc.usecase.RemoveExercise(authUserId, workoutId, exerciseId)
+	if err != nil {
+		wc.errorHandler.Handle(c, err)
+		return
+	}
+
+	responseWorkout := workout.ToResponseWorkout()
+
+	c.JSON(http.StatusCreated, responseWorkout)
+}
+
 func (wc *DefaultWorkoutController) Update(c *gin.Context) {
 	id, err := getParamAsInt64(c, "id")
 	if err != nil {

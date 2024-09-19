@@ -108,6 +108,8 @@ func registerWorkoutRoutes(
 	workoutsRouter.Use(middleware.ErrorLoggerMiddleware(logger))
 
 	workoutRepository := repository.NewWorkoutRepository(db)
+	exerciseRepository := repository.NewExerciseRepository(db)
+	workoutExerciseRepository := repository.NewWorkoutExerciseRepository(db)
 	accessManager := permission.BuildWorkoutAccessManager()
 	tokenManager := tokenutil.NewJWTTokenManager(
 		cfg.JWTAccessSecret,
@@ -118,6 +120,8 @@ func registerWorkoutRoutes(
 	errorMapper := errormapper.BuildAllErrorsMapperChain()
 	workoutUsecase := usecase.NewWorkoutUsecase(
 		workoutRepository,
+		exerciseRepository,
+		workoutExerciseRepository,
 		accessManager,
 		errorMapper,
 	)

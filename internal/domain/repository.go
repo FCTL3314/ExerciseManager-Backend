@@ -47,6 +47,10 @@ type WorkoutRepository interface {
 	Repository[Workout]
 }
 
+type WorkoutExerciseRepository interface {
+	Repository[WorkoutExercise]
+}
+
 type ExerciseRepository interface {
 	Repository[Exercise]
 }
