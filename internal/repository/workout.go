@@ -134,30 +134,30 @@ func (wr *WorkoutExerciseRepository) Fetch(params *domain.Params) ([]*domain.Wor
 	return workouts, nil
 }
 
-func (wr *WorkoutExerciseRepository) Create(workout *domain.WorkoutExercise) (*domain.WorkoutExercise, error) {
-	if err := (wr.db.Save(&workout)).Error; err != nil {
+func (wr *WorkoutExerciseRepository) Create(workoutExercise *domain.WorkoutExercise) (*domain.WorkoutExercise, error) {
+	if err := (wr.db.Save(&workoutExercise)).Error; err != nil {
 		return nil, err
 	}
 
 	query := applyPreloadsForGORMQuery(wr.db.Model(&domain.WorkoutExercise{}), wr.toPreload)
-	if err := query.First(workout).Error; err != nil {
+	if err := query.First(workoutExercise).Error; err != nil {
 		return nil, err
 	}
 
-	return workout, nil
+	return workoutExercise, nil
 }
 
-func (wr *WorkoutExerciseRepository) Update(workout *domain.WorkoutExercise) (*domain.WorkoutExercise, error) {
-	if err := (wr.db.Save(&workout)).Error; err != nil {
+func (wr *WorkoutExerciseRepository) Update(workoutExercise *domain.WorkoutExercise) (*domain.WorkoutExercise, error) {
+	if err := (wr.db.Save(&workoutExercise)).Error; err != nil {
 		return nil, err
 	}
 
 	query := applyPreloadsForGORMQuery(wr.db.Model(&domain.WorkoutExercise{}), wr.toPreload)
-	if err := query.First(workout).Error; err != nil {
+	if err := query.First(workoutExercise).Error; err != nil {
 		return nil, err
 	}
 
-	return workout, nil
+	return workoutExercise, nil
 }
 
 func (wr *WorkoutExerciseRepository) Delete(id int64) error {

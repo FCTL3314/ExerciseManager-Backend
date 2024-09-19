@@ -44,6 +44,13 @@ func NewInvalidURLParamResponse(detail string) *ErrorResponse {
 	)
 }
 
+func NewMaxRelatedObjectsNumberErrorResponse(detail string) *ErrorResponse {
+	return NewErrorResponse(
+		detail,
+		"max_related_objects_number_error",
+	)
+}
+
 var (
 	InternalServerErrorResponse = NewErrorResponse(
 		"Internal Server Error",

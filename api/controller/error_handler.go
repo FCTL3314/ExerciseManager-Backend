@@ -54,7 +54,16 @@ func handleAuthInvalidCredentials(c *gin.Context, err error) bool {
 func handleUniqueConstraint(c *gin.Context, err error) bool {
 	var errObjectUniqueConstraint *domain.ErrObjectUniqueConstraint
 	if errors.As(err, &errObjectUniqueConstraint) {
-		c.JSON(http.StatusUnauthorized, domain.NewUniqueConstraintErrorResponse(err.Error()))
+		c.JSON(http.StatusConflict, domain.NewUniqueConstraintErrorResponse(err.Error()))
+		return true
+	}
+	return false
+}
+
+func handleMaxRelatedObjectsNumber(c *gin.Context, err error) bool {
+	var errMaxRelatedObjectsNumberReached *domain.ErrMaxRelatedObjectsNumberReached
+	if errors.As(err, &errMaxRelatedObjectsNumberReached) {
+		c.JSON(http.StatusBadRequest, domain.NewMaxRelatedObjectsNumberErrorResponse(err.Error()))
 		return true
 	}
 	return false
@@ -87,6 +96,7 @@ func DefaultErrorHandler() *ErrorHandler {
 	eh.RegisterHandler(handleAccessDenied)
 	eh.RegisterHandler(handleInvalidParam)
 	eh.RegisterHandler(handlePaginationLimitExceeded)
+	eh.RegisterHandler(handleMaxRelatedObjectsNumber)
 	return eh
 }
 

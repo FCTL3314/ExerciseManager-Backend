@@ -38,3 +38,19 @@ type ErrInvalidURLParam struct {
 func (e *ErrInvalidURLParam) Error() string {
 	return fmt.Sprintf("Invalid \"%s\" URL parameter received", e.Param)
 }
+
+type ErrMaxRelatedObjectsNumberReached struct {
+	ParentObjectName  string
+	RelatedObjectName string
+	Limit             int
+}
+
+func (e *ErrMaxRelatedObjectsNumberReached) Error() string {
+	return fmt.Sprintf(
+		"Cannot add more \"%s\" objects to \"%s\" object. The maximum number of \"%s\" is %d.",
+		e.RelatedObjectName,
+		e.ParentObjectName,
+		e.RelatedObjectName,
+		e.Limit,
+	)
+}
