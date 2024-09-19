@@ -141,7 +141,7 @@ func (wc *DefaultWorkoutController) RemoveExercise(c *gin.Context) {
 
 	responseWorkout := workout.ToResponseWorkout()
 
-	c.JSON(http.StatusCreated, responseWorkout)
+	c.JSON(http.StatusOK, responseWorkout)
 }
 
 func (wc *DefaultWorkoutController) Update(c *gin.Context) {

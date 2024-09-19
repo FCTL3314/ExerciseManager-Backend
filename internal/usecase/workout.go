@@ -100,7 +100,7 @@ func (wu *WorkoutUsecase) AddExercise(authUserId, workoutId int64, addExerciseRe
 	return workout, nil
 }
 
-func (wu *WorkoutUsecase) RemoveExercise(authUserId, workoutId, exerciseId int64) (*domain.Workout, error) {
+func (wu *WorkoutUsecase) RemoveExercise(authUserId, workoutId, workoutExerciseId int64) (*domain.Workout, error) {
 	workout, err := wu.workoutRepository.GetById(workoutId)
 	if err != nil {
 		return nil, wu.errorMapper.MapError(err)
@@ -110,15 +110,7 @@ func (wu *WorkoutUsecase) RemoveExercise(authUserId, workoutId, exerciseId int64
 		return nil, domain.ErrAccessDenied
 	}
 
-	workoutExercise, err := wu.workoutExerciseRepository.Get(&domain.FilterParams{
-		Query: "exercise_id = ? AND workout_id = ?",
-		Args:  []interface{}{exerciseId, workoutId},
-	})
-	if err != nil {
-		return nil, wu.errorMapper.MapError(err)
-	}
-
-	err = wu.workoutExerciseRepository.Delete(workoutExercise.ID)
+	err = wu.workoutExerciseRepository.Delete(workoutExerciseId)
 	if err != nil {
 		return nil, wu.errorMapper.MapError(err)
 	}

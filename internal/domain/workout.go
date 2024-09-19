@@ -25,13 +25,13 @@ type WorkoutExercise struct {
 }
 
 type ResponseWorkout struct {
-	ID          int64                      `json:"id"`
-	Name        string                     `json:"name"`
-	Description string                     `json:"description"`
-	User        *ResponseUser              `json:"user"`
-	Exercises   []*ResponseWorkoutExercise `json:"exercises"`
-	CreatedAt   time.Time                  `json:"created_at"`
-	UpdatedAt   time.Time                  `json:"updated_at"`
+	ID               int64                      `json:"id"`
+	Name             string                     `json:"name"`
+	Description      string                     `json:"description"`
+	User             *ResponseUser              `json:"user"`
+	WorkoutExercises []*ResponseWorkoutExercise `json:"workout_exercises"`
+	CreatedAt        time.Time                  `json:"created_at"`
+	UpdatedAt        time.Time                  `json:"updated_at"`
 }
 
 type CreateWorkoutRequest struct {
@@ -45,6 +45,7 @@ type UpdateWorkoutRequest struct {
 }
 
 type ResponseWorkoutExercise struct {
+	ID        int64             `json:"id"`
 	Exercise  *ResponseExercise `json:"exercise"`
 	BreakTime time.Duration     `json:"break_time"`
 }
@@ -67,19 +68,16 @@ func NewWorkoutFromCreateRequest(req *CreateWorkoutRequest) *Workout {
 
 func (w *Workout) ToResponseWorkout() *ResponseWorkout {
 	rw := &ResponseWorkout{
-		ID:          w.ID,
-		Name:        w.Name,
-		Description: w.Description,
-		CreatedAt:   w.CreatedAt,
-		UpdatedAt:   w.UpdatedAt,
+		ID:               w.ID,
+		Name:             w.Name,
+		Description:      w.Description,
+		WorkoutExercises: ToResponseWorkoutExercises(w.WorkoutExercises),
+		CreatedAt:        w.CreatedAt,
+		UpdatedAt:        w.UpdatedAt,
 	}
 
 	if w.User != nil {
 		rw.User = w.User.ToResponseUser()
-	}
-
-	if len(w.WorkoutExercises) > 0 {
-		rw.Exercises = ToResponseWorkoutExercises(w.WorkoutExercises)
 	}
 
 	return rw
@@ -87,6 +85,7 @@ func (w *Workout) ToResponseWorkout() *ResponseWorkout {
 
 func (we *WorkoutExercise) ToResponseWorkoutExercise() *ResponseWorkoutExercise {
 	rw := &ResponseWorkoutExercise{
+		ID:        we.ID,
 		BreakTime: we.BreakTime,
 	}
 

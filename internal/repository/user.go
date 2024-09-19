@@ -67,8 +67,12 @@ func (ur *UserRepository) Update(user *domain.User) (*domain.User, error) {
 }
 
 func (ur *UserRepository) Delete(id int64) error {
-	if err := (ur.db.Where("id = ?", id).Delete(&domain.User{})).Error; err != nil {
-		return err
+	result := ur.db.Where("id = ?", id).Delete(&domain.User{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }

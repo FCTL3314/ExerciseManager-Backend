@@ -17,7 +17,7 @@ type WorkoutUsecase interface {
 	List(params *Params) (*PaginatedResult[*Workout], error)
 	Create(authUserId int64, createWorkoutRequest *CreateWorkoutRequest) (*Workout, error)
 	AddExercise(authUserId, workoutId int64, addExerciseRequest *AddExerciseToWorkoutRequest) (*Workout, error)
-	RemoveExercise(authUserId, workoutId, exerciseId int64) (*Workout, error)
+	RemoveExercise(authUserId, workoutId, workoutExerciseId int64) (*Workout, error)
 	Update(authUserId, id int64, updateWorkoutRequest *UpdateWorkoutRequest) (*Workout, error)
 	Delete(authUserId, id int64) error
 }

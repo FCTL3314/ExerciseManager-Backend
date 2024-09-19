@@ -74,8 +74,12 @@ func (wr *WorkoutRepository) Update(workout *domain.Workout) (*domain.Workout, e
 }
 
 func (wr *WorkoutRepository) Delete(id int64) error {
-	if err := (wr.db.Where("id = ?", id).Delete(&domain.Workout{})).Error; err != nil {
-		return err
+	result := wr.db.Where("id = ?", id).Delete(&domain.Workout{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }
@@ -157,8 +161,12 @@ func (wr *WorkoutExerciseRepository) Update(workout *domain.WorkoutExercise) (*d
 }
 
 func (wr *WorkoutExerciseRepository) Delete(id int64) error {
-	if err := (wr.db.Where("id = ?", id).Delete(&domain.WorkoutExercise{})).Error; err != nil {
-		return err
+	result := wr.db.Where("id = ?", id).Delete(&domain.WorkoutExercise{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }

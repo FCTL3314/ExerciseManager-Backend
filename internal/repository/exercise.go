@@ -74,8 +74,12 @@ func (er *ExerciseRepository) Update(exercise *domain.Exercise) (*domain.Exercis
 }
 
 func (er *ExerciseRepository) Delete(id int64) error {
-	if err := (er.db.Where("id = ?", id).Delete(&domain.Exercise{})).Error; err != nil {
-		return err
+	result := er.db.Where("id = ?", id).Delete(&domain.Exercise{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
 	}
 	return nil
 }
