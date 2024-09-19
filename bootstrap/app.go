@@ -2,6 +2,8 @@ package bootstrap
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 	"log"
 )
@@ -63,6 +65,16 @@ func (app *Application) initGin() {
 	if err := r.SetTrustedProxies(app.Cfg.Server.TrustedProxies); err != nil {
 		log.Fatal(err)
 	}
+
+	v, ok := binding.Validator.Engine().(*validator.Validate)
+	if !ok {
+		log.Fatalf("Failed to retrieve the Gin validator engine. Ensure that the validator is properly configured.")
+	}
+
+	if err := RegisterCustomValidators(v, app.Cfg); err != nil {
+		log.Fatal(err)
+	}
+
 	app.Router = r
 }
 

@@ -10,3 +10,10 @@ pagination:
 entities:
   workout:
     max_exercises_count: 100
+
+uploads:
+  allowed_image_extensions:
+    - .jpg
+    - .jpeg
+    - .png
+    - .gif

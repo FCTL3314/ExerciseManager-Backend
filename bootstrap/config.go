@@ -22,6 +22,10 @@ type Entities struct {
 	Workout
 }
 
+type Uploads struct {
+	AllowedImageExtensions []string `mapstructure:"allowed_image_extensions"`
+}
+
 type Workout struct {
 	MaxExercisesCount int `mapstructure:"max_exercises_count"`
 }
@@ -46,6 +50,7 @@ type Config struct {
 	JWT
 	Pagination
 	Entities
+	Uploads
 }
 
 func NewConfig() (*Config, error) {
@@ -95,6 +100,10 @@ func (cfg *Config) loadFromFile(Path string, ConfigType string) error {
 	}
 
 	if err := viper.Unmarshal(&cfg.Entities); err != nil {
+		return err
+	}
+
+	if err := viper.Unmarshal(&cfg.Uploads); err != nil {
 		return err
 	}
 

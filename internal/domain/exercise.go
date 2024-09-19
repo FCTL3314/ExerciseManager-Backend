@@ -36,12 +36,14 @@ type CreateExerciseRequest struct {
 	Name        string        `json:"name" binding:"required,min=1,max=128"`
 	Description string        `json:"description" binding:"required,min=1,max=256"`
 	Duration    time.Duration `json:"duration" binding:"required"`
+	Image       *string       `json:"image" binding:"omitempty,url"`
 }
 
 type UpdateExerciseRequest struct {
 	Name        *string        `json:"name,omitempty" binding:"omitempty,min=1,max=128"`
 	Description *string        `json:"description,omitempty" binding:"omitempty,min=1,max=256"`
 	Duration    *time.Duration `json:"duration,omitempty" binding:"omitempty"`
+	Image       *string        `json:"image" binding:"omitempty,url,imageextension"`
 }
 
 func NewExerciseFromCreateRequest(req *CreateExerciseRequest) *Exercise {
@@ -49,6 +51,7 @@ func NewExerciseFromCreateRequest(req *CreateExerciseRequest) *Exercise {
 		Name:        req.Name,
 		Description: req.Description,
 		Duration:    req.Duration,
+		Image:       req.Image,
 	}
 }
 
@@ -87,7 +90,11 @@ func (e *Exercise) ApplyUpdate(req *UpdateExerciseRequest) {
 	}
 
 	if req.Duration != nil {
-		e.Duration = time.Duration(*req.Duration)
+		e.Duration = *req.Duration
+	}
+
+	if req.Image != nil {
+		e.Image = req.Image
 	}
 }
 
