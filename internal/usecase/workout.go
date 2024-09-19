@@ -3,7 +3,7 @@ package usecase
 import (
 	"ExerciseManager/internal/domain"
 	"ExerciseManager/internal/errormapper"
-	"ExerciseManager/internal/limit"
+	"ExerciseManager/internal/limitations"
 	"ExerciseManager/internal/permission"
 	"reflect"
 )
@@ -79,11 +79,11 @@ func (wu *WorkoutUsecase) AddExercise(authUserId, workoutId int64, addExerciseRe
 		return nil, domain.ErrAccessDenied
 	}
 
-	if len(workout.WorkoutExercises) >= limit.MaxWorkoutExercisesCount {
+	if len(workout.WorkoutExercises) >= limitations.MaxWorkoutExercisesCount {
 		return nil, &domain.ErrMaxRelatedObjectsNumberReached{
 			ParentObjectName:  reflect.TypeOf(domain.Workout{}).Name(),
 			RelatedObjectName: reflect.TypeOf(domain.Exercise{}).Name(),
-			Limit:             limit.MaxWorkoutExercisesCount,
+			Limit:             limitations.MaxWorkoutExercisesCount,
 		}
 	}
 

@@ -1,4 +1,4 @@
-package limit
+package limitations
 
 const (
 	MaxUserPaginationLimit     = 32
