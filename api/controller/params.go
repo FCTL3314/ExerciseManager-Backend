@@ -2,7 +2,6 @@ package controller
 
 import (
 	"ExerciseManager/internal/domain"
-	"ExerciseManager/internal/limitations"
 	"github.com/gin-gonic/gin"
 	"strconv"
 )
@@ -41,16 +40,4 @@ func getPaginationParams(c *gin.Context, maxLimit int) (domain.PaginationParams,
 		Limit:  limit,
 		Offset: offset,
 	}, nil
-}
-
-func getUserPaginationParams(c *gin.Context) (domain.PaginationParams, error) {
-	return getPaginationParams(c, limitations.MaxUserPaginationLimit)
-}
-
-func getWorkoutPaginationParams(c *gin.Context) (domain.PaginationParams, error) {
-	return getPaginationParams(c, limitations.MaxWorkoutPaginationLimit)
-}
-
-func getExercisePaginationParams(c *gin.Context) (domain.PaginationParams, error) {
-	return getPaginationParams(c, limitations.MaxExercisePaginationLimit)
 }

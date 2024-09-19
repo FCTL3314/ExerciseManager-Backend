@@ -5,11 +5,25 @@ import (
 	"time"
 )
 
-type Security struct {
-	JWTAccessSecret  string `mapstructure:"jwt_access_secret"`
-	JWTRefreshSecret string `mapstructure:"jwt_refresh_secret"`
-	JWTAccessExpire  time.Duration
-	JWTRefreshExpire time.Duration
+type JWT struct {
+	AccessExpire  time.Duration `mapstructure:"access_expire"`
+	RefreshExpire time.Duration `mapstructure:"refresh_expire"`
+	AccessSecret  string        `mapstructure:"jwt_access_secret"`
+	RefreshSecret string        `mapstructure:"jwt_refresh_secret"`
+}
+
+type Pagination struct {
+	MaxUserLimit     int `mapstructure:"max_user_limit"`
+	MaxWorkoutLimit  int `mapstructure:"max_workout_limit"`
+	MaxExerciseLimit int `mapstructure:"max_exercise_limit"`
+}
+
+type Entities struct {
+	Workout
+}
+
+type Workout struct {
+	MaxExercisesCount int `mapstructure:"max_exercises_count"`
 }
 
 type Server struct {
@@ -27,9 +41,11 @@ type Database struct {
 }
 
 type Config struct {
-	Security
 	Server
-	DB Database
+	Database
+	JWT
+	Pagination
+	Entities
 }
 
 func NewConfig() (*Config, error) {
@@ -37,7 +53,9 @@ func NewConfig() (*Config, error) {
 	if err := cfg.LoadEnv("./.env"); err != nil {
 		return nil, err
 	}
-	cfg.loadJWTExpire()
+	if err := cfg.LoadYml("./config.yml"); err != nil {
+		return nil, err
+	}
 	return cfg, nil
 }
 
@@ -60,15 +78,23 @@ func (cfg *Config) loadFromFile(Path string, ConfigType string) error {
 		return err
 	}
 
-	if err := viper.Unmarshal(&cfg.DB); err != nil {
-		return err
-	}
-
 	if err := viper.Unmarshal(&cfg.Server); err != nil {
 		return err
 	}
 
-	if err := viper.Unmarshal(&cfg.Security); err != nil {
+	if err := viper.Unmarshal(&cfg.Database); err != nil {
+		return err
+	}
+
+	if err := viper.Unmarshal(&cfg.JWT); err != nil {
+		return err
+	}
+
+	if err := viper.Unmarshal(&cfg.Pagination); err != nil {
+		return err
+	}
+
+	if err := viper.Unmarshal(&cfg.Entities); err != nil {
 		return err
 	}
 
@@ -79,8 +105,6 @@ func (cfg *Config) LoadEnv(Path string) error {
 	return cfg.loadFromFile(Path, "env")
 }
 
-func (cfg *Config) loadJWTExpire() {
-	// TODO: Move to .yml config file.
-	cfg.JWTAccessExpire = time.Hour * 1
-	cfg.JWTRefreshExpire = (time.Hour * 24) * 7
+func (cfg *Config) LoadYml(Path string) error {
+	return cfg.loadFromFile(Path, "yml")
 }

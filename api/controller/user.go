@@ -11,17 +11,20 @@ type DefaultUserController struct {
 	usecase      domain.UserUsecase
 	errorHandler *ErrorHandler
 	Logger       bootstrap.Logger
+	cfg          *bootstrap.Config
 }
 
 func NewUserController(
 	usecase domain.UserUsecase,
 	errorHandler *ErrorHandler,
 	logger bootstrap.Logger,
+	cfg *bootstrap.Config,
 ) *DefaultUserController {
 	return &DefaultUserController{
 		usecase:      usecase,
 		errorHandler: errorHandler,
 		Logger:       logger,
+		cfg:          cfg,
 	}
 }
 
@@ -58,7 +61,7 @@ func (uc *DefaultUserController) Get(c *gin.Context) {
 }
 
 func (uc *DefaultUserController) List(c *gin.Context) {
-	paginationParams, err := getUserPaginationParams(c)
+	paginationParams, err := getPaginationParams(c, uc.cfg.Pagination.MaxUserLimit)
 	if err != nil {
 		uc.errorHandler.Handle(c, err)
 		return

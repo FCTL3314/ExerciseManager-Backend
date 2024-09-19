@@ -73,10 +73,10 @@ func registerUserRoutes(
 	accessManager := permission.BuildUserAccessManager()
 	passwordHasher := auth.NewBcryptPasswordHasher()
 	tokenManager := tokenutil.NewJWTTokenManager(
-		cfg.JWTAccessSecret,
-		cfg.JWTRefreshSecret,
-		cfg.JWTAccessExpire,
-		cfg.JWTRefreshExpire,
+		cfg.JWT.AccessSecret,
+		cfg.JWT.RefreshSecret,
+		cfg.JWT.AccessExpire,
+		cfg.JWT.RefreshExpire,
 	)
 	errorMapper := errormapper.BuildAllErrorsMapperChain()
 	userUsecase := usecase.NewUserUsecase(
@@ -92,6 +92,7 @@ func registerUserRoutes(
 		userUsecase,
 		errorHandler,
 		logger,
+		cfg,
 	)
 
 	userRouter := NewUserRouter(usersRouter, tokenManager, userController, cfg)
@@ -112,10 +113,10 @@ func registerWorkoutRoutes(
 	workoutExerciseRepository := repository.NewWorkoutExerciseRepository(db)
 	accessManager := permission.BuildWorkoutAccessManager()
 	tokenManager := tokenutil.NewJWTTokenManager(
-		cfg.JWTAccessSecret,
-		cfg.JWTRefreshSecret,
-		cfg.JWTAccessExpire,
-		cfg.JWTRefreshExpire,
+		cfg.JWT.AccessSecret,
+		cfg.JWT.RefreshSecret,
+		cfg.JWT.AccessExpire,
+		cfg.JWT.RefreshExpire,
 	)
 	errorMapper := errormapper.BuildAllErrorsMapperChain()
 	workoutUsecase := usecase.NewWorkoutUsecase(
@@ -124,6 +125,7 @@ func registerWorkoutRoutes(
 		workoutExerciseRepository,
 		accessManager,
 		errorMapper,
+		cfg,
 	)
 
 	errorHandler := controller.DefaultErrorHandler()
@@ -131,6 +133,7 @@ func registerWorkoutRoutes(
 		workoutUsecase,
 		errorHandler,
 		logger,
+		cfg,
 	)
 
 	workoutRouter := NewWorkoutRouter(workoutsRouter, tokenManager, workoutController, cfg)
@@ -149,10 +152,10 @@ func registerExerciseRoutes(
 	exerciseRepository := repository.NewExerciseRepository(db)
 	accessManager := permission.BuildExerciseAccessManager()
 	tokenManager := tokenutil.NewJWTTokenManager(
-		cfg.JWTAccessSecret,
-		cfg.JWTRefreshSecret,
-		cfg.JWTAccessExpire,
-		cfg.JWTRefreshExpire,
+		cfg.JWT.AccessSecret,
+		cfg.JWT.RefreshSecret,
+		cfg.JWT.AccessExpire,
+		cfg.JWT.RefreshExpire,
 	)
 	errorMapper := errormapper.BuildAllErrorsMapperChain()
 	exerciseUsecase := usecase.NewExerciseUsecase(
@@ -166,6 +169,7 @@ func registerExerciseRoutes(
 		exerciseUsecase,
 		errorHandler,
 		logger,
+		cfg,
 	)
 
 	exerciseRouter := NewExerciseRouter(exercisesRouter, tokenManager, exerciseController, cfg)

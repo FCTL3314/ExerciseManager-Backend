@@ -11,17 +11,20 @@ type DefaultWorkoutController struct {
 	usecase      domain.WorkoutUsecase
 	errorHandler *ErrorHandler
 	Logger       bootstrap.Logger
+	cfg          *bootstrap.Config
 }
 
 func NewWorkoutController(
 	usecase domain.WorkoutUsecase,
 	errorHandler *ErrorHandler,
 	logger bootstrap.Logger,
+	cfg *bootstrap.Config,
 ) *DefaultWorkoutController {
 	return &DefaultWorkoutController{
 		usecase:      usecase,
 		errorHandler: errorHandler,
 		Logger:       logger,
+		cfg:          cfg,
 	}
 }
 
@@ -45,7 +48,7 @@ func (wc *DefaultWorkoutController) Get(c *gin.Context) {
 }
 
 func (wc *DefaultWorkoutController) List(c *gin.Context) {
-	paginationParams, err := getWorkoutPaginationParams(c)
+	paginationParams, err := getPaginationParams(c, wc.cfg.Pagination.MaxWorkoutLimit)
 	if err != nil {
 		wc.errorHandler.Handle(c, err)
 		return

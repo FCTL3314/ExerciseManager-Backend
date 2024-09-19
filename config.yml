@@ -1,0 +1,12 @@
+jwt:
+  access_expire: 3600000000000 # Lifetime in nanoseconds (1 Hour)
+  refresh_expire: 604800000000000 # Lifetime in nanoseconds (1 Week)
+
+pagination:
+  max_user_limit: 64
+  max_workout_limit: 64
+  max_exercise_limit: 100
+
+entities:
+  workout:
+    max_exercises_count: 100

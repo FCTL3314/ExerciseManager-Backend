@@ -32,11 +32,11 @@ func (app *Application) initConfig() {
 
 func (app *Application) initDB() {
 	DBConnector := NewConnector(
-		app.Cfg.DB.Name,
-		app.Cfg.DB.User,
-		app.Cfg.DB.Password,
-		app.Cfg.DB.Host,
-		app.Cfg.DB.Port,
+		app.Cfg.Database.Name,
+		app.Cfg.Database.User,
+		app.Cfg.Database.Password,
+		app.Cfg.Database.Host,
+		app.Cfg.Database.Port,
 	)
 	db, err := DBConnector.Connect()
 	if err != nil {

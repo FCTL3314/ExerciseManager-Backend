@@ -1,9 +1,9 @@
 package usecase
 
 import (
+	"ExerciseManager/bootstrap"
 	"ExerciseManager/internal/domain"
 	"ExerciseManager/internal/errormapper"
-	"ExerciseManager/internal/limitations"
 	"ExerciseManager/internal/permission"
 	"reflect"
 )
@@ -14,6 +14,7 @@ type WorkoutUsecase struct {
 	workoutExerciseRepository domain.WorkoutExerciseRepository
 	accessManager             permission.AccessPolicy
 	errorMapper               errormapper.Chain
+	cfg                       *bootstrap.Config
 }
 
 func NewWorkoutUsecase(
@@ -22,6 +23,7 @@ func NewWorkoutUsecase(
 	workoutExerciseRepository domain.WorkoutExerciseRepository,
 	accessManager permission.AccessPolicy,
 	errorMapper errormapper.Chain,
+	cfg *bootstrap.Config,
 ) *WorkoutUsecase {
 	return &WorkoutUsecase{
 		workoutRepository:         workoutRepository,
@@ -29,6 +31,7 @@ func NewWorkoutUsecase(
 		workoutExerciseRepository: workoutExerciseRepository,
 		accessManager:             accessManager,
 		errorMapper:               errorMapper,
+		cfg:                       cfg,
 	}
 }
 
@@ -79,11 +82,11 @@ func (wu *WorkoutUsecase) AddExercise(authUserId, workoutId int64, addExerciseRe
 		return nil, domain.ErrAccessDenied
 	}
 
-	if len(workout.WorkoutExercises) >= limitations.MaxWorkoutExercisesCount {
+	if len(workout.WorkoutExercises) >= wu.cfg.Workout.MaxExercisesCount {
 		return nil, &domain.ErrMaxRelatedObjectsNumberReached{
 			ParentObjectName:  reflect.TypeOf(domain.Workout{}).Name(),
 			RelatedObjectName: reflect.TypeOf(domain.Exercise{}).Name(),
-			Limit:             limitations.MaxWorkoutExercisesCount,
+			Limit:             wu.cfg.Workout.MaxExercisesCount,
 		}
 	}
 
