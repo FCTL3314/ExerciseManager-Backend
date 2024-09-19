@@ -61,7 +61,7 @@ func (er *ExerciseRepository) Create(exercise *domain.Exercise) (*domain.Exercis
 }
 
 func (er *ExerciseRepository) Update(exercise *domain.Exercise) (*domain.Exercise, error) {
-	if err := (er.db.Save(&exercise)).Error; err != nil {
+	if err := (er.db.Omit("Workouts").Save(&exercise)).Error; err != nil {
 		return nil, err
 	}
 

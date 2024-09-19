@@ -61,7 +61,7 @@ func (wr *WorkoutRepository) Create(workout *domain.Workout) (*domain.Workout, e
 }
 
 func (wr *WorkoutRepository) Update(workout *domain.Workout) (*domain.Workout, error) {
-	if err := (wr.db.Save(&workout)).Error; err != nil {
+	if err := (wr.db.Omit("WorkoutExercises").Save(&workout)).Error; err != nil {
 		return nil, err
 	}
 

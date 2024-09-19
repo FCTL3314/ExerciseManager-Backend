@@ -9,18 +9,19 @@ type Exercise struct {
 	Name        string
 	Description string
 	Duration    time.Duration
+	Image       *string
 	UserID      int64
 	User        *User
 	Workouts    []*Workout `gorm:"many2many:workout_exercises;"`
 }
 
 type ResponseExercise struct {
-	ID          int64              `json:"id"`
-	Name        string             `json:"name"`
-	Description string             `json:"description"`
-	Duration    time.Duration      `json:"duration"`
-	User        *ResponseUser      `json:"user"`
-	Workouts    []*ResponseWorkout `json:"workouts"`
+	ID          int64         `json:"id"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Duration    time.Duration `json:"duration"`
+	Image       *string       `json:"image"`
+	User        *ResponseUser `json:"user"`
 }
 
 type ResponseNestedExercise struct {
@@ -28,6 +29,7 @@ type ResponseNestedExercise struct {
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
 	Duration    time.Duration `json:"duration"`
+	Image       *string       `json:"image"`
 }
 
 type CreateExerciseRequest struct {
@@ -56,7 +58,7 @@ func (e *Exercise) ToResponseExercise() *ResponseExercise {
 		Name:        e.Name,
 		Description: e.Description,
 		Duration:    e.Duration,
-		Workouts:    ToResponseWorkouts(e.Workouts),
+		Image:       e.Image,
 	}
 
 	if e.User != nil {
@@ -71,6 +73,7 @@ func (e *Exercise) ToResponseNestedExercise() *ResponseNestedExercise {
 		Name:        e.Name,
 		Description: e.Description,
 		Duration:    e.Duration,
+		Image:       e.Image,
 	}
 }
 
@@ -84,7 +87,7 @@ func (e *Exercise) ApplyUpdate(req *UpdateExerciseRequest) {
 	}
 
 	if req.Duration != nil {
-		e.Duration = *req.Duration
+		e.Duration = time.Duration(*req.Duration)
 	}
 }
 
