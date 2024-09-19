@@ -29,6 +29,7 @@ func (wr *WorkoutRouter) RegisterAll() {
 	wr.RegisterList()
 	wr.RegisterCreate()
 	wr.RegisterAddExercise()
+	wr.RegisterUpdateExercise()
 	wr.RegisterRemoveExercise()
 	wr.RegisterUpdate()
 	wr.RegisterDelete()
@@ -48,6 +49,10 @@ func (wr *WorkoutRouter) RegisterCreate() {
 
 func (wr *WorkoutRouter) RegisterAddExercise() {
 	wr.router.POST("/:id/exercises/add", middleware.JwtAuthMiddleware(wr.tokenManager), wr.workoutController.AddExercise)
+}
+
+func (wr *WorkoutRouter) RegisterUpdateExercise() {
+	wr.router.PATCH("/:id/exercises/:workoutExerciseId/update", middleware.JwtAuthMiddleware(wr.tokenManager), wr.workoutController.UpdateExercise)
 }
 
 func (wr *WorkoutRouter) RegisterRemoveExercise() {

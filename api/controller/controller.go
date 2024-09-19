@@ -20,5 +20,6 @@ type UserController interface {
 type WorkoutController interface {
 	Controller
 	AddExercise(c *gin.Context)
+	UpdateExercise(c *gin.Context)
 	RemoveExercise(c *gin.Context)
 }

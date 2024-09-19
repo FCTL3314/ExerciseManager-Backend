@@ -113,6 +113,33 @@ func (wu *WorkoutUsecase) AddExercise(authUserId, workoutId int64, addExerciseRe
 	return workout, nil
 }
 
+func (wu *WorkoutUsecase) UpdateExercise(authUserId, workoutId, workoutExerciseId int64, updateWorkoutExerciseRequest *domain.UpdateWorkoutExerciseRequest) (*domain.Workout, error) {
+	workoutExerciseToUpdate, err := wu.workoutExerciseRepository.GetById(workoutExerciseId)
+	if err != nil {
+		return nil, wu.errorMapper.MapError(err)
+	}
+
+	if workoutId != workoutExerciseToUpdate.WorkoutID {
+		return nil, domain.ErrObjectNotFound
+	}
+
+	if !wu.accessManager.HasAccess(authUserId, workoutExerciseToUpdate.Workout) {
+		return nil, domain.ErrAccessDenied
+	}
+
+	workoutExerciseToUpdate.ApplyUpdate(updateWorkoutExerciseRequest)
+	if _, err := wu.workoutExerciseRepository.Update(workoutExerciseToUpdate); err != nil {
+		return nil, wu.errorMapper.MapError(err)
+	}
+
+	workout, err := wu.workoutRepository.GetById(workoutId)
+	if err != nil {
+		return nil, wu.errorMapper.MapError(err)
+	}
+
+	return workout, nil
+}
+
 func (wu *WorkoutUsecase) RemoveExercise(authUserId, workoutId, workoutExerciseId int64) (*domain.Workout, error) {
 	workout, err := wu.workoutRepository.GetById(workoutId)
 	if err != nil {

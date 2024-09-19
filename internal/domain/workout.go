@@ -56,7 +56,7 @@ type AddExerciseToWorkoutRequest struct {
 }
 
 type UpdateWorkoutExerciseRequest struct {
-	BreakTime time.Duration `json:"break_time,omitempty" binding:"omitempty"`
+	BreakTime *time.Duration `json:"break_time,omitempty" binding:"omitempty"`
 }
 
 func NewWorkoutFromCreateRequest(req *CreateWorkoutRequest) *Workout {
@@ -83,6 +83,16 @@ func (w *Workout) ToResponseWorkout() *ResponseWorkout {
 	return rw
 }
 
+func (w *Workout) ApplyUpdate(req *UpdateWorkoutRequest) {
+	if req.Name != nil {
+		w.Name = *req.Name
+	}
+
+	if req.Description != nil {
+		w.Description = *req.Description
+	}
+}
+
 func (we *WorkoutExercise) ToResponseWorkoutExercise() *ResponseWorkoutExercise {
 	rw := &ResponseWorkoutExercise{
 		ID:        we.ID,
@@ -96,13 +106,9 @@ func (we *WorkoutExercise) ToResponseWorkoutExercise() *ResponseWorkoutExercise 
 	return rw
 }
 
-func (w *Workout) ApplyUpdate(req *UpdateWorkoutRequest) {
-	if req.Name != nil {
-		w.Name = *req.Name
-	}
-
-	if req.Description != nil {
-		w.Description = *req.Description
+func (we *WorkoutExercise) ApplyUpdate(req *UpdateWorkoutExerciseRequest) {
+	if req.BreakTime != nil {
+		we.BreakTime = *req.BreakTime
 	}
 }
 
