@@ -23,6 +23,13 @@ type ResponseExercise struct {
 	Workouts    []*ResponseWorkout `json:"workouts"`
 }
 
+type ResponseNestedExercise struct {
+	ID          int64         `json:"id"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	Duration    time.Duration `json:"duration"`
+}
+
 type CreateExerciseRequest struct {
 	Name        string        `json:"name" binding:"required,min=1,max=128"`
 	Description string        `json:"description" binding:"required,min=1,max=256"`
@@ -56,6 +63,15 @@ func (e *Exercise) ToResponseExercise() *ResponseExercise {
 		re.User = e.User.ToResponseUser()
 	}
 	return re
+}
+
+func (e *Exercise) ToResponseNestedExercise() *ResponseNestedExercise {
+	return &ResponseNestedExercise{
+		ID:          e.ID,
+		Name:        e.Name,
+		Description: e.Description,
+		Duration:    e.Duration,
+	}
 }
 
 func (e *Exercise) ApplyUpdate(req *UpdateExerciseRequest) {
