@@ -22,6 +22,7 @@ type WorkoutExercise struct {
 	ExerciseID int64
 	Exercise   *Exercise
 	BreakTime  time.Duration
+	CreatedAt  time.Time
 }
 
 type ResponseWorkout struct {
@@ -48,6 +49,7 @@ type ResponseWorkoutExercise struct {
 	ID        int64                   `json:"id"`
 	Exercise  *ResponseNestedExercise `json:"exercise"`
 	BreakTime time.Duration           `json:"break_time"`
+	CreatedAt time.Time               `json:"created_at"`
 }
 
 type AddExerciseToWorkoutRequest struct {
@@ -97,6 +99,7 @@ func (we *WorkoutExercise) ToResponseWorkoutExercise() *ResponseWorkoutExercise 
 	rw := &ResponseWorkoutExercise{
 		ID:        we.ID,
 		BreakTime: we.BreakTime,
+		CreatedAt: we.CreatedAt,
 	}
 
 	if we.Exercise != nil {

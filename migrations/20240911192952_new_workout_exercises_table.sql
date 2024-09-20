@@ -3,9 +3,9 @@
 CREATE TABLE IF NOT EXISTS workout_exercises
 (
     id          SERIAL PRIMARY KEY,
-    workout_id  INT    NOT NULL,
-    exercise_id INT    NOT NULL,
-    break_time  BIGINT NOT NULL,
+    workout_id  INT       NOT NULL,
+    exercise_id INT       NOT NULL,
+    break_time  BIGINT    NOT NULL,
     CONSTRAINT fk_workout
         FOREIGN KEY (workout_id)
             REFERENCES workouts (id)

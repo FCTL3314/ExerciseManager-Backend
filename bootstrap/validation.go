@@ -6,15 +6,19 @@ import (
 )
 
 func RegisterCustomValidators(v *validator.Validate, cfg *Config) error {
-	if err := registerImageExtensionValidator(v, cfg.Uploads.AllowedImageExtensions); err != nil {
+	if err := registerImageExtensionValidator(
+		v, "imageextension", cfg.Uploads.AllowedImageExtensions,
+	); err != nil {
 		return err
 	}
 	return nil
 }
 
-func registerImageExtensionValidator(v *validator.Validate, AllowedImageExtensions []string) error {
+func registerImageExtensionValidator(
+	v *validator.Validate, structTagName string, AllowedImageExtensions []string,
+) error {
 	if err := v.RegisterValidation(
-		"imageextension",
+		structTagName,
 		func(fl validator.FieldLevel) bool {
 			return validation.IsValidImageExtension(
 				fl.Field().String(),

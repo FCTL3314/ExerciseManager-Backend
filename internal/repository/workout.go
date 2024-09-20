@@ -119,6 +119,7 @@ func (wr *WorkoutExerciseRepository) Get(filterParams *domain.FilterParams) (*do
 	return &workout, nil
 }
 
+// Fetch TODO: Здесь можно вместо получения WorkoutExercise как вложенные объекты, сделать отдельный endpoint, тогда будет легче добавить возможность сортировки.
 func (wr *WorkoutExerciseRepository) Fetch(params *domain.Params) ([]*domain.WorkoutExercise, error) {
 	var workouts []*domain.WorkoutExercise
 	query := wr.db.Where(params.Filter.Query, params.Filter.Args...)
