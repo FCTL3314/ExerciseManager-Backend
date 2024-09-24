@@ -48,14 +48,10 @@ func (wc *DefaultWorkoutController) Get(c *gin.Context) {
 }
 
 func (wc *DefaultWorkoutController) List(c *gin.Context) {
-	paginationParams, err := getPaginationParams(c, wc.cfg.Pagination.MaxWorkoutLimit)
+	params, err := getParams(c, wc.cfg.Pagination.MaxWorkoutLimit)
 	if err != nil {
 		wc.errorHandler.Handle(c, err)
 		return
-	}
-
-	params := domain.Params{
-		Pagination: paginationParams,
 	}
 
 	paginatedResult, err := wc.usecase.List(&params)
@@ -68,8 +64,8 @@ func (wc *DefaultWorkoutController) List(c *gin.Context) {
 
 	paginatedResponse := domain.PaginatedResponse{
 		Count:   paginatedResult.Count,
-		Limit:   paginationParams.Limit,
-		Offset:  paginationParams.Offset,
+		Limit:   params.Pagination.Limit,
+		Offset:  params.Pagination.Offset,
 		Results: responseWorkouts,
 	}
 

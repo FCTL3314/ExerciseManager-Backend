@@ -2,7 +2,7 @@
 OS := $(shell uname)
 
 # Docker services
-DOCKER_COMPOSE_PROJECT_NAME=exercise_manager_services_local
+DOCKER_COMPOSE_PROJECT_NAME=exercise_manager_backend_services_local
 LOCAL_DOCKER_COMPOSE_FILE=./docker/local/docker-compose.yml
 
 up_local_services:
