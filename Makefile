@@ -1,3 +1,5 @@
+.PHONY: update
+
 # System
 OS := $(shell uname)
 
@@ -25,3 +27,12 @@ apply_migrations:
 
 add_migration:
 	goose -dir $(MIGRATIONS_DIR) create $(name) sql
+
+# Deployment
+DEFAULT_SERVICE_NAME = exercise_manager_server
+
+get_updates:
+	git pull
+	sudo systemctl restart $(or $(SERVICE_NAME), $(DEFAULT_SERVICE_NAME))
+	sudo systemctl --no-pager status $(or $(SERVICE_NAME), $(DEFAULT_SERVICE_NAME))
+
