@@ -34,7 +34,7 @@ type ResponseNestedExercise struct {
 
 type CreateExerciseRequest struct {
 	Name        string        `json:"name" binding:"required,min=1,max=128"`
-	Description string        `json:"description" binding:"required,min=1,max=256"`
+	Description string        `json:"description" binding:"omitempty,min=1,max=256"`
 	Duration    time.Duration `json:"duration" binding:"required"`
 	Image       *string       `json:"image" binding:"omitempty,url"`
 }
