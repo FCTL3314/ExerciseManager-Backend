@@ -34,5 +34,5 @@ DEFAULT_SERVICE_NAME = exercise_manager_server
 get_updates:
 	git pull
 	sudo systemctl restart $(or $(SERVICE_NAME), $(DEFAULT_SERVICE_NAME))
-	sudo systemctl --no-pager status $(or $(SERVICE_NAME), $(DEFAULT_SERVICE_NAME))
+	sudo systemctl --no-pager -l status $(or $(SERVICE_NAME), $(DEFAULT_SERVICE_NAME))
 
