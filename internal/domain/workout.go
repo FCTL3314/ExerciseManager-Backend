@@ -37,12 +37,12 @@ type ResponseWorkout struct {
 
 type CreateWorkoutRequest struct {
 	Name        string `json:"name" binding:"required,min=1,max=128"`
-	Description string `json:"description" binding:"omitempty"`
+	Description string `json:"description" binding:"omitempty,max=516"`
 }
 
 type UpdateWorkoutRequest struct {
 	Name        *string `json:"name,omitempty" binding:"omitempty,min=1,max=128"`
-	Description *string `json:"description,omitempty" binding:"omitempty"`
+	Description *string `json:"description,omitempty" binding:"omitempty,max=516"`
 }
 
 type ResponseWorkoutExercise struct {
